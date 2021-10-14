@@ -42,7 +42,9 @@ print("\nCreate Tables in DB")
 cur.execute('''CREATE TABLE Employee(
 EmployeeID INTEGER PRIMARY KEY AUTOINCREMENT, 
 FirstName TEXT NOT NULL,
-LastName TEXT NOT NULL
+LastName TEXT NOT NULL,
+Username TEXT NOT NULL, 
+Password TEXT NOT NULL
 );''')
 print('Employee Table created successfully.')
 
@@ -81,9 +83,9 @@ conn.commit()
 ## Populate tables ##
 
 # Employees
-emp = [["Sally", "Smith"], ["John", "Doe"], ["Heather", "Robbins"]]
+emp = [["Sally", "Smith", "admin", "123"], ["John", "Doe", "user1", "123"], ["Heather", "Robbins", "user2", "123"]]
 for x in emp: 
-    cur.execute('''INSERT INTO Employee(FirstName, LastName) VALUES(?,?)''', x)
+    cur.execute('''INSERT INTO Employee(FirstName, LastName, Username, Password) VALUES(?,?,?,?)''', x)
 
 # Products 
 prod = [[100, "Chocolate Chip Cookie", 48, 1.50, .25, "Cookie"], [101, "Sugar Cookie", 24, 1.50, .15, "Cookie"], 
