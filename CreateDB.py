@@ -53,8 +53,8 @@ cur.execute('''CREATE TABLE Product(
 ProductID INTEGER PRIMARY KEY, 
 Name TEXT, 
 Quantity INTEGER, 
-Cost REAL,
-Price REAL, 
+SellingPrice REAL,
+Cost REAL, 
 Category TEXT 
 );''')
 print('Transactions Table created successfully.')
@@ -92,7 +92,7 @@ prod = [[100, "Chocolate Chip Cookie", 48, 1.50, .25, "Cookie"], [101, "Sugar Co
         [200, "Plain Bagel", 10, 3.00, .50, "Bread"], [201, "Biscuit", 12, 2.00, .30, "Bread"],
         [300, "Birthday Cake", 5, 15.00, 5.00, "Cake"], [301, "Vanilla Cupcake", 24, 3.00, .50, "Cake"]]
 for x in prod: 
-    cur.execute('''INSERT INTO Product(ProductID, Name, Quantity, Cost, Price, Category) VALUES(?,?,?,?,?,?)''', x)
+    cur.execute('''INSERT INTO Product(ProductID, Name, Quantity, SellingPrice, Cost, Category) VALUES(?,?,?,?,?,?)''', x)
 
 
 conn.commit()
