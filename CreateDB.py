@@ -71,8 +71,8 @@ print('Transactions Table created successfully.')
 
 # Transactions_Item
 cur.execute('''CREATE TABLE Transactions_Item(
-TransactionID INTEGER PRIMARY KEY NOT NULL, 
-ProductID INTEGER NOT NULL,
+TransactionID INTEGER NOT NULL REFERENCES Transactions(TransactionID),
+ProductID INTEGER NOT NULL REFERENCES Product(ProductID),
 Quantity INTEGER,
 Cost REAL
 );''')
@@ -94,6 +94,17 @@ prod = [[100, "Chocolate Chip Cookie", 48, 1.50, .25, "Cookie"], [101, "Sugar Co
 for x in prod: 
     cur.execute('''INSERT INTO Product(ProductID, Name, Quantity, SellingPrice, Cost, Category) VALUES(?,?,?,?,?,?)''', x)
 
+# Transaction
+tran = [[1, 22.47, "10/19/21", "cash"],
+        [2, 5.50, "1/10/20", "cash"]]
+for x in tran:
+    cur.execute('''INSERT INTO Transactions(EmployeeID, TotalCost, Date, PaymentType) VALUES(?,?,?,?)''', x)
+
+# Transaction Items
+tran_it = [[1, 300, 1, 15.00], 
+           [1, 301, 2, 6.00]]
+for x in tran_it:
+    cur.execute('''INSERT INTO Transactions_Item(TransactionID, ProductID, Quantity, Cost) VALUES(?,?,?,?)''', x)
 
 conn.commit()
 conn.close()

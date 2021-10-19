@@ -94,11 +94,49 @@ def viewTransactionsTable():
     for  x in cur.execute('''SELECT * FROM Transactions'''):
         print (x)
 
+def listAllTransactions():
+    cur.execute('''SELECT * FROM Transactions''')
+    return cur.fetchall()
+
+def getTransactionFromID(tranID):
+    cur.execute('''SELECT * FROM Transactions where TransactionID=?''', (tranID, ))
+    return cur.fetchone()
+
+def getEmployeeIDFromTransactionID(tranID):
+    cur.execute('''SELECT EmployeeID FROM Transactions where TransactionID=?''', (tranID, ))
+    return cur.fetchone()[0]
+
+def getTransactionTotalCostFromID(tranID):
+    cur.execute('''SELECT TotalCost from Transactions where TransactionID=?''', (tranID, ))
+    return cur.fetchone()[0]
+
+def getTransactionDateFromID(tranID):
+    cur.execute('''SELECT Date from Transactions where TransactionID=?''', (tranID, ))
+    return cur.fetchone()[0]
+
+def getTransactionPaymentTypeFromID(tranID):
+    cur.execute('''SELECT PaymentType from Transactions where TransactionID=?''', (tranID, ))
+    return cur.fetchone()[0]
 
 #################################### Transactions_Item ####################################
 # Prints every row in the Transactions_Item table 
-def viewTransactions_ItemTable():
+def viewTran_ItemTable():
     print('\nTransactions_Item Table:')
     for  x in cur.execute('''SELECT * FROM Transactions_Item'''):
         print (x)
 
+def listAllTran_Item():
+    cur.execute('''SELECT * FROM Transactions_Item''')
+    return cur.fetchall()
+
+def getTran_ItemFromTranIDProdID(tranID, prodID):
+    cur.execute('''SELECT * FROM Transactions_Item WHERE TransactionID=? AND ProductID=?''', (tranID, prodID, ))
+    return cur.fetchall()
+
+def getTran_ItemQuantityFromTranIdProdID(tranID, prodID):
+    cur.execute('''SELECT Quantity FROM Transactions_Item WHERE TransactionID=? AND ProductID=?''', (tranID, prodID, ))
+    return cur.fetchone()[0]
+
+def getTran_ItemCostFromTranIdProdID(tranID, prodID):
+    cur.execute('''SELECT Cost FROM Transactions_Item WHERE TransactionID=? AND ProductID=?''', (tranID, prodID, ))
+    return cur.fetchone()[0]
