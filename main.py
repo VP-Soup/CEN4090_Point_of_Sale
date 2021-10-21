@@ -1,4 +1,4 @@
-from Login import *
+from LoginWindow import *
 
 
 
