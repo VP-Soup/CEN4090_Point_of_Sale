@@ -3,6 +3,7 @@
 from DataAccess import *
 
 
+# class represents one line of receipt
 class LineItem:
     # initialize LineItem with tid of Transaction, and item
     def __init__(self, tid, itemID, quantity):
@@ -39,6 +40,7 @@ class LineItem:
         return self.price
 
 
+# class represents the total transaction
 class Transaction:
     def __init__(self, eid):
         self.lines = []  # list of all line items
@@ -52,7 +54,7 @@ class Transaction:
         self.cash_method = False  # bool for if transaction paid in cash or not
         self.cash_received = 0.0  # cash tendered
         self.change_returned = 0.0  # excess in cash tendered
-        self.transaction_status = 0  # 0 : in progress; 1 : complete; -1 : terminated; 2: paused
+        self.transaction_status = 0  # 0 : in progress; 1 : complete; -1 : paused;
 
     # method to add a new item or increment an existing item
     def increment_item(self, itemID, amount):
@@ -60,6 +62,7 @@ class Transaction:
             if line.increment_quantity(itemID, amount) != -1:
                 return
         self.lines.append(LineItem(self.tid, itemID, amount))
+        return
 
     # method to entirely remove an item from the transaction
     def remove_item(self, itemID):
@@ -71,6 +74,7 @@ class Transaction:
 
     # replace with method to connect to GUI Receipt area or File output
     def print_receipt(self):
+        self.update_price()
         if self.tid != -1:
             print("RECEIPT:")
             for line in self.lines:
@@ -78,11 +82,13 @@ class Transaction:
         else:
             print("Error: Transaction not submitted to DB yet")
 
+    # method to pause transaction
     def pause_transaction(self):
         # insert into DB
-        self.transaction_status = 2
+        self.transaction_status = -1
         # Call to GUI to store this transaction?
 
+    # method to update price related attributes
     def update_price(self):
         running_total = 0
         for line in self.lines:
@@ -90,6 +96,19 @@ class Transaction:
         self.pre_tax = running_total
         self.final_cost = running_total*(1-self.discount)*self.tax
 
+    # method to clear transaction of all values
     def clear_transaction(self):
         for line in self.lines:
             del line
+        self.update_price()
+
+    # called at the end of the transaction
+    def finalize_transaction(self, cash_status, cash_amount):
+        self.update_price()
+        self.cash_method = cash_status
+        self.cash_received = cash_amount
+        self.change_returned = self.final_cost - self.cash_received
+        self.transaction_status = 1
+        # insert into DB
+        self.print_receipt()
+
