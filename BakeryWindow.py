@@ -15,27 +15,52 @@ category_bg_color=["#eba994","#e39888","#94a9eb","#94ebb8","#e7eb94"]
 use_font='Times'
 
 class Bakery:
+    #DEFINE GLOBAL SETTING FOR ROOT WINDOW WIDTH AND HEIGHT
+    global root_width
+    root_width = 1900
+    global root_height
+    root_height = 1000
 
     def __init__(self, root):
         self.root = root
         self.root.title('Bakery')
         self.root.iconbitmap('CakesBakery.png')
 
+        # GET THE DISPLAY WINDOW DIMENSIONS
+        screen_width = root.winfo_screenwidth()
+        screen_height = root.winfo_screenheight()
+
+        # FIND THE CENTER OF THE MONITOR WINDOW
+        window_center_x = int(screen_width / 2 - root_width / 2)
+        window_center_y = int(screen_height / 2 - root_height / 2)
+
+        #SET THE ROOT WINDOW LOCATION ON THE DISPLAY
+        self.root.geometry(f'{root_width}x{root_height}+{window_center_x}+{window_center_y}')
+
+        #CREATE A MENU BAR
         app_menu=Menu(self.root)
 
-        # FILE MENU ITEMS
-        # file_menu = Menu(app_menu, tearoff=0)
-        # file_menu.add_command(label="New",)
-        # file_menu.add_separator()
-        # file_menu.add_command(label="Exit", command=self.root.quit)
-        # app_menu.add_cascade(label="File",menu=file_menu)
-        #
-        # admin_menu = Menu(app_menu, tearoff=0)
-        # admin_menu.add_command(label="Login", command=showLoginWindow(x))
-        # admin_menu.add_separator()
-        # admin_menu.add_command(label="Logout", command=showLoginWindow())
-        # app_menu.add_cascade(label="Admin", menu=admin_menu)
+        #FILE MENU ITEMS
+        file_menu = Menu(app_menu, tearoff=0)
+        file_menu.add_command(label="New",)
+        file_menu.add_command(label="Open", )
+        file_menu.add_command(label="Save", )
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=root.destroy)
+        app_menu.add_cascade(label="File",menu=file_menu)
 
+        #ADMINISTRATOR MENU OPTIONS
+        admin_menu = Menu(app_menu, tearoff=0)
+        admin_menu.add_command(label="Login", command=doNothing())
+        admin_menu.add_separator()
+        admin_menu.add_command(label="Logout", command=doNothing())
+        app_menu.add_cascade(label="Admin", menu=admin_menu)
+
+        #HELP MENU OPTIONS
+        help_menu=Menu(app_menu,tearoff=0)
+        help_menu.add_command(label="Help",)
+        help_menu.add_command(label="About",)
+        app_menu.add_cascade(label="Help",menu=help_menu)
         self.root.config(menu=app_menu)
 
         self.scrollable_Button_Frame=ttk.Frame()
@@ -57,7 +82,7 @@ class Bakery:
 
         sbf = ttk.Style()
         sbf.configure('sbf.TFrame', background=frame_color, font=(use_font, 20), borderwidth=5,
-                      relief='raised')  # #7AC5CD
+                      relief='raised')
         scrollable_button_frame = ttk.Frame(button_canvas, style='sbf.TFrame')
         scrollable_button_frame.columnconfigure(0, weight=1)
         scrollable_button_frame.columnconfigure(1, weight=1)
@@ -102,11 +127,10 @@ class Bakery:
 
         # MAIN WINDOW DIMENSIONS
         # ROOT STYLE SETTING FONT TO Times AND SIZE 20
-        #self.root.geometry = ('1920x1080')
         r=ttk.Style()
         r.theme_use('default')
         r.configure('.',background=button_bg_color,font=(use_font,20))
-        canvas = tk.Canvas(master =self.root, width=1920, height=1080,bg = 'white')
+        canvas = tk.Canvas(master =self.root, width=root_width, height=root_height,bg = 'white')
         canvas.pack()
 
 
@@ -238,11 +262,16 @@ class Bakery:
 
 
 
+
 def showLoginWindow(e):
     e.destroy()
     newRoot=Tk()
     application=LoginWindow.Login(newRoot)
     newRoot.mainloop()
+
+def doNothing():
+    pass
+
 
 def bakery_frame(container):
     frame = ttk.Frame(container)
