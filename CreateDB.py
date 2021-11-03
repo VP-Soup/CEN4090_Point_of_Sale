@@ -50,18 +50,18 @@ print('Employee Table created successfully.')
 
 # Product
 cur.execute('''CREATE TABLE Product(
-ProductID INTEGER PRIMARY KEY, 
+ProductID INTEGER PRIMARY KEY AUTOINCREMENT, 
 Name TEXT, 
 Quantity INTEGER, 
 SellingPrice REAL,
 Cost REAL, 
 Category TEXT 
 );''')
-print('Transactions Table created successfully.')
+print('Product Table created successfully.')
 
 # Transactions
 cur.execute('''CREATE TABLE Transactions(
-TransactionID INTEGER PRIMARY KEY AUTOINCREMENT , 
+TransactionID INTEGER PRIMARY KEY AUTOINCREMENT, 
 EmployeeID INTEGER NOT NULL,
 TotalCost REAL,
 Date TEXT,
@@ -71,10 +71,12 @@ print('Transactions Table created successfully.')
 
 # Transactions_Item
 cur.execute('''CREATE TABLE Transactions_Item(
-TransactionID INTEGER NOT NULL REFERENCES Transactions(TransactionID),
+TransactionID INTEGER NOT NULL REFERENCES Transactions(TransactionID)
+    ON DELETE CASCADE,
 ProductID INTEGER NOT NULL REFERENCES Product(ProductID),
 Quantity INTEGER,
 Cost REAL
+ 
 );''')
 print('Transactions_Item Table created successfully.')
 
@@ -88,11 +90,11 @@ for x in emp:
     cur.execute('''INSERT INTO Employee(FirstName, LastName, Username, Password) VALUES(?,?,?,?)''', x)
 
 # Products 
-prod = [[100, "Chocolate Chip Cookie", 48, 1.50, .25, "Cookie"], [101, "Sugar Cookie", 24, 1.50, .15, "Cookie"], 
-        [200, "Plain Bagel", 10, 3.00, .50, "Bread"], [201, "Biscuit", 12, 2.00, .30, "Bread"],
-        [300, "Birthday Cake", 5, 15.00, 5.00, "Cake"], [301, "Vanilla Cupcake", 24, 3.00, .50, "Cake"]]
+prod = [["Chocolate Chip Cookie", 48, 1.50, .25, "Cookie"], ["Sugar Cookie", 24, 1.50, .15, "Cookie"], 
+        ["Plain Bagel", 10, 3.00, .50, "Bread"], ["Biscuit", 12, 2.00, .30, "Bread"],
+        ["Birthday Cake", 5, 15.00, 5.00, "Cake"], ["Vanilla Cupcake", 24, 3.00, .50, "Cake"]]
 for x in prod: 
-    cur.execute('''INSERT INTO Product(ProductID, Name, Quantity, SellingPrice, Cost, Category) VALUES(?,?,?,?,?,?)''', x)
+    cur.execute('''INSERT INTO Product(Name, Quantity, SellingPrice, Cost, Category) VALUES(?,?,?,?,?)''', x)
 
 # Transaction
 tran = [[1, 22.47, "10/19/21", "cash"],
@@ -101,8 +103,8 @@ for x in tran:
     cur.execute('''INSERT INTO Transactions(EmployeeID, TotalCost, Date, PaymentType) VALUES(?,?,?,?)''', x)
 
 # Transaction Items
-tran_it = [[1, 300, 1, 15.00], 
-           [1, 301, 2, 6.00]]
+tran_it = [[1, 5, 1, 15.00], 
+           [1, 6, 2, 6.00]]
 for x in tran_it:
     cur.execute('''INSERT INTO Transactions_Item(TransactionID, ProductID, Quantity, Cost) VALUES(?,?,?,?)''', x)
 

@@ -2,6 +2,7 @@ import sqlite3
 
 conn = sqlite3.connect('BakeryDatabase.db')
 cur = conn.cursor()
+cur.execute('''PRAGMA foreign_keys = ON''')
 
 
 # Returns a list of all table names in the DB
@@ -55,9 +56,33 @@ def getEmployeeFromLogin(user, pas):
 
 
 # Inserts a new Employee record into the Employee table
-def insertEmployee(firstName, lastName, username, password):
-    return cur.execute('''INSERT INTO Employee (FirstName, LastName, Username, Password) VALUES (?, ?, ?, ?)''',
+def insertEmployee(firstName='', lastName='', username='', password=''):
+    cur.execute('''INSERT INTO Employee (FirstName, LastName, Username, Password) VALUES (?, ?, ?, ?)''',
                        (firstName, lastName, username, password))
+    conn.commit()
+    return "Employee Inserted"
+
+
+# Update Employee with ID 
+def updateEmployee(empID, firstName='', lastName='', username='', password=''):
+    if firstName: 
+        cur.execute('''UPDATE Employee SET FirstName = ? WHERE EmployeeID = ?''', (firstName, empID, ))
+    if lastName: 
+        cur.execute('''UPDATE Employee SET LastName = ? WHERE EmployeeID = ?''', (lastName, empID, ))
+    if username: 
+        cur.execute('''UPDATE Employee SET Username = ? WHERE EmployeeID = ?''', (username, empID, ))
+    if password: 
+        cur.execute('''UPDATE Employee SET password = ? WHERE EmployeeID = ?''', (password, empID, ))
+    conn.commit()
+    return "Employee updated"
+
+
+# Delete row from Employee table using ID 
+def deleteEmployee(empID):
+    sql = "DELETE FROM Employee WHERE EmployeeID = ?"
+    cur.execute(sql, (empID,))
+    conn.commit()
+    return "Employee Deleted"
 
 
 #################################### Product ####################################
@@ -110,6 +135,38 @@ def getProductCategoryFromID(prodID):
     return cur.fetchone()[0]
 
 
+# Inserts a new Product record into the Product table
+def insertProduct(name = "", quantity= 0, sellP=0, cost=0, category=""):
+    cur.execute('''INSERT INTO Product (Name, Quantity, SellingPrice, Cost, Category) VALUES (?, ?, ?, ?, ?)''',
+                       (name, quantity, sellP, cost, category))
+    conn.commit()
+    return "Product Inserted"
+
+
+# Update Product with ID 
+def updateProduct(prodID, name='', quantity=-111, sellingP=-111, cost=-111, category=''):
+    if name: 
+        cur.execute('''UPDATE Product SET Name = ? WHERE ProductID = ?''', (name, prodID, ))
+    if quantity !=-111: 
+        cur.execute('''UPDATE Product SET Quantity = ? WHERE ProductID = ?''', (quantity, prodID, ))
+    if sellingP !=-111: 
+        cur.execute('''UPDATE Product SET SellingPrice = ? WHERE ProductID = ?''', (sellingP, prodID, ))
+    if cost !=-111: 
+        cur.execute('''UPDATE Product SET Cost = ? WHERE ProductID = ?''', (cost, prodID, ))
+    if category: 
+        cur.execute('''UPDATE Product SET Category = ? WHERE ProductID = ?''', (category, prodID, ))
+    conn.commit()
+    return "Product updated"
+
+
+# Remove Product from table using ID 
+def deleteProduct(prodID):
+    sql = "DELETE FROM Product WHERE ProductID = ?"
+    cur.execute(sql, (prodID,))
+    conn.commit()
+    return "Product Deleted"
+
+
 #################################### Transactions ####################################
 # Prints every row in the Transactions table
 def viewTransactionsTable():
@@ -118,36 +175,43 @@ def viewTransactionsTable():
         print(x)
 
 
+# Returns a List of all rows in the table
 def listAllTransactions():
     cur.execute('''SELECT * FROM Transactions''')
     return cur.fetchall()
 
 
+# Returns row of Transaction from ID 
 def getTransactionFromID(tranID):
     cur.execute('''SELECT * FROM Transactions where TransactionID=?''', (tranID,))
     return cur.fetchone()
 
 
+# Get ID of the employee who completed the transaction 
 def getEmployeeIDFromTransactionID(tranID):
     cur.execute('''SELECT EmployeeID FROM Transactions where TransactionID=?''', (tranID,))
     return cur.fetchone()[0]
 
 
+# Get Total Cost of transaction from the ID 
 def getTransactionTotalCostFromID(tranID):
     cur.execute('''SELECT TotalCost from Transactions where TransactionID=?''', (tranID,))
     return cur.fetchone()[0]
 
 
+# Get the Date of the transaction from the ID 
 def getTransactionDateFromID(tranID):
     cur.execute('''SELECT Date from Transactions where TransactionID=?''', (tranID,))
     return cur.fetchone()[0]
 
 
+# Get the payment type of the transaction from the ID 
 def getTransactionPaymentTypeFromID(tranID):
     cur.execute('''SELECT PaymentType from Transactions where TransactionID=?''', (tranID,))
     return cur.fetchone()[0]
 
 
+# Insert transaction into table and return transaction ID 
 def upsertTransaction(employeeID="", totalCost=0.0, date="0000-00-00", paymentType="", transactionID=None):
     val = '''NULL''' if transactionID is None else '''?'''
 
@@ -167,6 +231,28 @@ def upsertTransaction(employeeID="", totalCost=0.0, date="0000-00-00", paymentTy
     return cur.fetchone()[0]
 
 
+# Update Transaction with ID 
+def updateTransaction(tranID, empID=-111, totalCost=-111, date='', paymentType=''):
+    if empID !=-111: 
+        cur.execute('''UPDATE Transactions SET EmployeeID = ? WHERE TransactionID = ?''', (empID, tranID, ))
+    if totalCost !=-111: 
+        cur.execute('''UPDATE Transactions SET TotalCost = ? WHERE TransactionID = ?''', (totalCost, tranID, ))
+    if date: 
+        cur.execute('''UPDATE Transactions SET Date = ? WHERE TransactionID = ?''', (date, tranID, ))
+    if paymentType: 
+        cur.execute('''UPDATE Transactions SET PaymentType = ? WHERE TransactionID = ?''', (paymentType, tranID, ))
+    conn.commit()
+    return "Transaction updated"
+
+
+# Remove transaction from table using ID 
+def deleteTransaction(tranID):
+    sql = "DELETE FROM Transactions WHERE TransactionID = ?"
+    cur.execute(sql, (tranID,))
+    conn.commit()
+    return "Transaction Deleted"
+
+
 #################################### Transactions_Item ####################################
 # Prints every row in the Transactions_Item table
 def viewTran_ItemTable():
@@ -175,21 +261,56 @@ def viewTran_ItemTable():
         print(x)
 
 
+# Returns a List of all rows in the table
 def listAllTran_Item():
     cur.execute('''SELECT * FROM Transactions_Item''')
     return cur.fetchall()
 
 
+# return row of Transactions_item table using TrasactionID and ProductID 
 def getTran_ItemFromTranIDProdID(tranID, prodID):
     cur.execute('''SELECT * FROM Transactions_Item WHERE TransactionID=? AND ProductID=?''', (tranID, prodID,))
-    return cur.fetchall()
+    return cur.fetchone()
 
 
+# Get the Quantity of the Transactions_item using 2 IDs
 def getTran_ItemQuantityFromTranIdProdID(tranID, prodID):
     cur.execute('''SELECT Quantity FROM Transactions_Item WHERE TransactionID=? AND ProductID=?''', (tranID, prodID,))
     return cur.fetchone()[0]
 
 
+# Get the Cost of the Transactions_item using 2 IDs
 def getTran_ItemCostFromTranIdProdID(tranID, prodID):
     cur.execute('''SELECT Cost FROM Transactions_Item WHERE TransactionID=? AND ProductID=?''', (tranID, prodID,))
     return cur.fetchone()[0]
+
+
+# Inserts a new Transaction_Item record into the Transaction_Item table
+def insertTran_Item(transactionID, productID, quantity=0, cost=0.00):
+    try: 
+        cur.execute('''INSERT INTO Transactions_Item (TransactionID, ProductID, Quantity, Cost) VALUES (?, ?, ?, ?)''',
+                        (transactionID, productID, quantity, cost))
+        conn.commit()
+        return "Transaction Item Inserted"
+    except sqlite3.IntegrityError:
+        return "Invalid Transaction/Product ID"
+
+
+# Update Transaction_Item with IDs
+def updateTran_Item(tranID, prodID, quantity=-111, cost=-111):
+    if quantity !=-111: 
+        cur.execute('''UPDATE Transactions_Item SET Quantity = ? WHERE TransactionID = ? AND ProductID = ?''',
+         (quantity, tranID, prodID, ))
+    if cost !=-111: 
+        cur.execute('''UPDATE Transactions_Item SET Cost = ? WHERE TransactionID = ? AND ProductID = ?''',
+         (cost, tranID, prodID, ))
+    conn.commit()
+    return "Transaction_Item updated"
+
+
+# Remove transaction from table using ID 
+def deleteTran_Item(tranID, prodID):
+    sql = "DELETE FROM Transactions_Item WHERE TransactionID = ? AND ProductID = ?"
+    cur.execute(sql, (tranID, prodID,))
+    conn.commit()
+    return "Transactions_Item Deleted"

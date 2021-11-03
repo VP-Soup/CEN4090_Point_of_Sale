@@ -80,6 +80,7 @@ print(f"Date: {getTransactionDateFromID(1)}")
 print(f"Payment Type: {getTransactionPaymentTypeFromID(1)}")
 '''
 
+'''
 print("Test Transactions_Item DAL")
 viewTran_ItemTable()
 
@@ -90,3 +91,21 @@ print("\nSingle Row Query from ID")
 print(getTran_ItemFromTranIDProdID(1, 301))
 print(f"Quantitiy: {getTran_ItemQuantityFromTranIdProdID(1, 301)}")
 print("Total Cost: ${:0.2f}".format(getTran_ItemCostFromTranIdProdID(1, 301)))
+'''
+
+
+'''print ("New transaction ID: ", upsertTransaction(employeeID = 2, date ="11/03/21", paymentType= "card"))
+print(insertTran_Item(3, 4, 3, 9.00))
+print(insertTran_Item(3, 5))
+print(insertTran_Item(3, 1))
+print(insertTran_Item(3, 2))
+
+viewTransactionsTable()
+viewTran_ItemTable()
+
+deleteTransaction(3)
+
+print("\nAfter Delete")
+viewTransactionsTable()
+viewTran_ItemTable()'''
+
