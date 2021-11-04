@@ -1,10 +1,23 @@
+##########################################################################################################
+## Application Bakery Point of Sale - 3FPS                                                              ##
+## Bakery Window GUI: main window for point of sale. Products are listed to purchase                    ##
+##                      transactions are maintained in the transaction view and totalized below         ##
+##                      The window header provides File,Admin adn Help items for some navigation        ##
+##                      Admin- login & logout + chart window selection                                  ##
+##          Main window header has a few quick function buttons to sort by product category for quick   ##
+##                      search                                                                          ##
+## References: YouTube.com, Codemy.com, Stackoverflow.com, tutorialspoint.com, geeksforgeeks.org,       ##
+##            pythonguides.com, anzeljg.github.io, & pythontutorial.net                                 ##
+## Date: 06NOV21                                                                                        ##
+##########################################################################################################
+
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
 from operator import itemgetter
-import DataAccess, LoginWindow, ViewDatabase,Transaction,DatabaseWindow,BakeryButton
+import DataAccess, LoginWindow, About,Charts,BakeryButton
 
-# Bakery GUI window
+
 # CONSTANT VARIABLES USED THROUGHOUT THE CODE
 # FRAME RELATIVE HEIGHT, RELATIVE WIDTH AND A COMMON COLOR
 frame_rel_height = 0.9
@@ -51,22 +64,21 @@ class Bakery:
 
         #ADMINISTRATOR MENU OPTIONS
         admin_menu = Menu(app_menu, tearoff=0)
-        admin_menu.add_command(label="Login", command=doNothing())
-        admin_menu.add_separator()
+        admin_menu.add_command(label="Login", command=lambda: showLoginWindow(self.root))
         admin_menu.add_command(label="Logout", command=doNothing())
+        admin_menu.add_separator()
+        admin_menu.add_command(label="Charts",command=lambda: showCharts(self.root))
         app_menu.add_cascade(label="Admin", menu=admin_menu)
 
         #HELP MENU OPTIONS
         help_menu=Menu(app_menu,tearoff=0)
         help_menu.add_command(label="Help",)
-        help_menu.add_command(label="About",)
+        help_menu.add_command(label="About",command=About.About)
         app_menu.add_cascade(label="Help",menu=help_menu)
         self.root.config(menu=app_menu)
 
         self.scrollable_Button_Frame=ttk.Frame()
         self.create_main_window()
-
-
 
     # BUTTON FRAME: CREATE A SCROLLABLE WINDOW TO SCROLL THE PRODUCT BUTTONS.
     def create_button_frame(self):
@@ -76,10 +88,12 @@ class Bakery:
         button_frame_label = LabelFrame(button_frame, text="PRODUCT SELECTION", font=(use_font, 24))
         button_frame.place(relwidth=frame_rel_width, relheight=frame_rel_height, relx=0.0, rely=0.1)
 
+        #CREATE A CANVAS TO INSTALL OTHER WIDGETS OF THE APPLICATION INTO
         button_canvas = tk.Canvas(button_frame)
         button_canvas.pack(side=LEFT, fill=BOTH, expand=1)
-        scrollbar = ttk.Scrollbar(button_frame, orient="vertical", command=button_canvas.yview)
 
+        #SCROLLBAR FOR THE BUTTON FRAME AND CONFIGURATION SETTINGS FOR THE BUTTON FRAME
+        scrollbar = ttk.Scrollbar(button_frame, orient="vertical", command=button_canvas.yview)
         sbf = ttk.Style()
         sbf.configure('sbf.TFrame', background=frame_color, font=(use_font, 20), borderwidth=5,
                       relief='raised')
@@ -133,11 +147,10 @@ class Bakery:
         canvas = tk.Canvas(master =self.root, width=root_width, height=root_height,bg = 'white')
         canvas.pack()
 
-
         # CREATE THE SCROLLABLE FRAME FOR THE PRODUCT SELECTION BUTTONS TO BE PLACED.
         scrollable_Button_Frame=self.create_button_frame()
 
-        # ADD THE HEADER
+        # ADD THE HEADER FRAME TO ADD BUTTONS FOR CATEGORY SELECTION
         appName_Frame = LabelFrame(self.root, text="", background=frame_color)
         appName_Frame['borderwidth']=5
         appName_Frame['relief']='raised'
@@ -161,68 +174,77 @@ class Bakery:
         transaction_frame['relief']='raised'
         transaction_frame.place(relwidth = frame_rel_width, relheight = frame_rel_height,relx=0.5,rely=0.1)
 
-
         #transaction FRAME STYLE WHERE ALL THE ITEMS FOR THIS TRANSACTION WILL BE DISPLAYED
         rfs = ttk.Style()
-        rfs.theme_use('default')
-        rfs.configure("TreeView", background = frame_color, foreground = "black", rowheight = 200,
-                        fieldbackground = frame_color, font=(use_font, 30),sticky='nsew') # #D3D3D3
-        rfs.map('TreeView', background =[('selected',"#ab90cb")])
+        # rfs.theme_use('default')
+        rfs.configure("rs.Treeview",
+                      background = frame_color,
+                      foreground = "black",
+                      rowheight = 25,
+                      fieldbackground = frame_color,
+                      font=(use_font, 20),
+                      sticky='nsew') # #D3D3D3
 
-        # ADD SCROLLBAR TO SCROLL THE transaction
+        rfs.configure('rs.Treeview.Heading',
+                      font=(use_font,22))
+        rfs.map('TreeView',
+                background =[('selected',"#ab90cb")])
+
+        # ADD SCROLLBAR TO SCROLL THE TRANSACTION TREEVIEW
         transaction_scroll=Scrollbar(transaction_frame)
         transaction_scroll.pack(side=RIGHT,fill=Y)
         transaction_view=ttk.Treeview(transaction_frame,
-                                 height=25,
+                                 height=20,
                                  yscrollcommand=transaction_scroll.set,
                                  selectmode="extended",
-                                 style='Treeview')
+                                 style='rs.Treeview')
         transaction_scroll.config(command=transaction_view.yview)
         transaction_view['columns']=("ITEM","QUANTITY","PRICE")
         transaction_view.column("#0",width=0,stretch = NO)
         transaction_view.column("ITEM", anchor=W,width=250)
-        transaction_view.column("QUANTITY", anchor=CENTER, width=75)
-        transaction_view.column("PRICE", anchor=E,width=200)
+        transaction_view.column("QUANTITY", anchor=E, width=250)
+        transaction_view.column("PRICE", anchor=E,width=250)
         transaction_view.heading("ITEM", text="ITEM", anchor=W)
         transaction_view.heading("QUANTITY",text="QUANTITY",anchor=CENTER)
         transaction_view.heading("PRICE", text="PRICE", anchor=E)
         transaction_view.pack()
 
+        transaction_frame_width = transaction_frame.winfo_screenwidth()
+        print("transaction view width: ", transaction_frame_width)
 
         #CREATE FRAME FOR THE TRANSACTION TOTAL
         # tf=ttk.Style()
         # tf.configure('tf.TFrame',font=(use_font,22),foreground='black',background = "lightblue")
-        # total_frame = ttk.Frame(self.root, style='tf.TFrame')
-        # total_frame.place(relwidth=frame_rel_width-0.03,relheight =0.1, relx=0.51, rely=0.80)
-
+        total_frame = ttk.Frame(transaction_frame,width=transaction_frame_width)
+        total_frame.pack()
         #CREATE TRANSACTION LABEL AND TEXTBOX
-        subtotal_textbox = ttk.Label(master=transaction_frame,
+        subtotal_textbox = ttk.Label(master=total_frame,
                                   text="Sub Total     $ 0.00",
                                   foreground = 'black',
-                                  background=frame_color,
+                                  # background=frame_color,
                                   padding=10,
                                   justify=tk.RIGHT)
         subtotal_textbox.pack(anchor='e')
-        tax_textbox = ttk.Label(master=transaction_frame,
+        tax_textbox = ttk.Label(master=total_frame,
                                   text="Tax     $ 0.00",
                                   foreground = 'black',
-                                  background=frame_color,
+                                  #background=frame_color,
                                   padding=10,
                                   justify=tk.RIGHT)
         tax_textbox.pack(anchor='e')
 
-        total_textbox = ttk.Label(master=transaction_frame,
+        total_textbox = ttk.Label(master=total_frame,
                                   text="Total     $ 0.00",
                                   foreground = 'black',
-                                  background=frame_color,
+                                  #background=frame_color,
                                   padding=10,
                                   justify=tk.RIGHT)
         total_textbox.pack(anchor='e')
 
-        checkout_button=tk.Button(master=transaction_frame,
+        checkout_button=tk.Button(master=total_frame,
                                   text="CHECKOUT",
                                   foreground='black',
-                                  background=frame_color,
+                                  #background=frame_color,
                                   padx=20,
                                   pady=20,
                                   font=(use_font,36))
@@ -259,9 +281,11 @@ class Bakery:
             else:
                 i += 1
 
-
-
-
+def showCharts(e):
+    e.destroy()
+    newRoot=Tk()
+    application=Charts.Graph(newRoot)
+    newRoot.mainloop()
 
 def showLoginWindow(e):
     e.destroy()
