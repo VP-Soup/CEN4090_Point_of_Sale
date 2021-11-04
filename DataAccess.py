@@ -1,3 +1,5 @@
+import hashlib
+import os
 import sqlite3
 
 conn = sqlite3.connect('BakeryDatabase.db')
@@ -35,18 +37,16 @@ def getEmployeeNameFromID(empID):
     return cur.fetchone()
 
 
-# Returns True if username and password is valid / False otherwise
-def validateLoginCredentials(user, pas):
-    # If Username exists, check password
-    if cur.execute("""SELECT Username FROM Employee WHERE Username = ?""", (user,)).fetchone():
-        # If Password exists, return true
-        if cur.execute("""SELECT Password FROM Employee WHERE Username = ? AND Password = ?""",
-                       (user, pas,)).fetchone():
-            return True
-        else:
-            return False  # Password invalid
-    else:
-        return False  # Username invalid
+# Returns True/False if user/pass do/don't match, or -1 if user was not found in db
+def validateLoginCredentials(user, password):
+    try:
+        key, salt = cur.execute("SELECT Password, PasswordSalt FROM Employee WHERE Username = ?", (user,)).fetchone()
+    except TypeError:
+        return -1   # user not found in db
+
+    match_key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+
+    return key == match_key
 
 
 # Returns array containing an Employee's attributes from login credentials
@@ -57,8 +57,11 @@ def getEmployeeFromLogin(user, pas):
 
 # Inserts a new Employee record into the Employee table
 def insertEmployee(firstName='', lastName='', username='', password=''):
-    cur.execute('''INSERT INTO Employee (FirstName, LastName, Username, Password) VALUES (?, ?, ?, ?)''',
-                       (firstName, lastName, username, password))
+    salt = os.urandom(64)   # generate random password salt
+    key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)     # encode password
+
+    cur.execute('''INSERT INTO Employee (FirstName, LastName, Username, Password, PasswordSalt) VALUES (?, ?, ?, ?, ?)''',
+                       (firstName, lastName, username, key, salt))
     conn.commit()
     return "Employee Inserted"
 
