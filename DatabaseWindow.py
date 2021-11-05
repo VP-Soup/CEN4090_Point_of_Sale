@@ -25,10 +25,18 @@ class DatabaseWindow:
     def doNothing():
         pass
 
+    # SHOW BAKERY WINDOW
     def showBakeryWindow(e):
         e.destroy()
         newRoot = Tk()
         application = BakeryWindow.Bakery(newRoot)
+        newRoot.mainloop()
+
+    # SHOW THE CHARTS WINDOW
+    def showCharts(e):
+        e.destroy()
+        newRoot = Tk()
+        application = Charts.Graph(newRoot)
         newRoot.mainloop()
 
     def __init__(self, root):
@@ -43,7 +51,7 @@ class DatabaseWindow:
         # CREATE A MENU BAR
         app_menu = Menu(self.root)
 
-        # FILE MENU ITEMS
+        # FILE MENU ITEMS; ONLY THE EXIT ACTUALLY DOES ANYTHING AT THE MOMENT
         file_menu = Menu(app_menu, tearoff=0)
         file_menu.add_command(label="New", )
         file_menu.add_command(label="Open", )
@@ -53,40 +61,43 @@ class DatabaseWindow:
         app_menu.add_cascade(label="File", menu=file_menu)
 
         # ADMINISTRATOR MENU OPTIONS
+        # LOGIN SHOWS THE LOGIN WINDOW
+        # LOGOUT WILL CLOSE THE OPEN WINDOW AND SHOW THE BAKERY WINDOW
+        # CHARTS REQUIRES NO LOGIN, SHOWS THE CHART WINDOW
         admin_menu = Menu(app_menu, tearoff=0)
         admin_menu.add_command(label="Login", command=lambda: BakeryWindow.showLoginWindow(self.root))
         admin_menu.add_command(label="Logout", command=lambda: BakeryWindow.Bakery(self.root))
         admin_menu.add_separator()
-        admin_menu.add_command(label="Charts", command=Charts.Graph)
+        admin_menu.add_command(label="Charts", command= lambda: DatabaseWindow.showCharts(self.root))
         app_menu.add_cascade(label="Admin", menu=admin_menu)
 
         # HELP MENU OPTIONS
+        # HAS THE ABOUT POPUP WINDOW THAT WILL LIST CODE AND TUTORIAL SOURCES
         help_menu = Menu(app_menu, tearoff=0)
         help_menu.add_command(label="Help", )
         help_menu.add_command(label="About",command=About.About)
         app_menu.add_cascade(label="Help", menu=help_menu)
         self.root.config(menu=app_menu)
 
-        #GET THE DISPLAY WINDOW DIMENSIONS
+        # GET THE DISPLAY WINDOW DIMENSIONS
         screen_width=root.winfo_screenwidth()
         screen_height=root.winfo_screenheight()
 
-        #FIND THE CENTER OF THE MONITOR WINDOW
+        # FIND THE CENTER OF THE MONITOR WINDOW
         window_center_x=int(screen_width/2-root_width/2)
         window_center_y=int(screen_height/2-root_height/2)
 
-        #SET THE ROOT WINDOW LOCATION ON THE DISPLAY
+        # SET THE ROOT WINDOW LOCATION ON THE DISPLAY
         root.geometry(f'{root_width}x{root_height}+{window_center_x}+{window_center_y}')
         canvas = tk.Canvas(master=self.root, width=root_width, height=root_height, bg='white')
         canvas.pack()
         canvas['highlightcolor']='white'
 
-        #CREATE A CONNECTION TO THE DATABASE
+        # CREATE A CONNECTION TO THE DATABASE
         conn=sqlite3.connect('BakeryDatabase.db')
 
-        #SET THE STYLE OF THE DATABASE ENTRY
+        # SET THE STYLE OF THE DATABASE ENTRY
         db_style=ttk.Style()
-        #db_style.theme_use('default')
         db_style.configure('db.Treeview',
                            background="#eae1df",
                            foreground='black',
@@ -131,30 +142,30 @@ class DatabaseWindow:
                        stretch=NO)
         db_view.column("ID",
                        anchor=W,
-                       #width=150,
+                       #width=150, #HAVING A PRESET WIDTH CAUSED ISSUES
                        stretch=YES)
         db_view.column("NAME",
                        anchor=CENTER,
-                       #width=150,
+                       #width=150, #HAVING A PRESET WIDTH CAUSED ISSUES
                        stretch=YES)
         db_view.column("QUANTITY",
                        anchor=CENTER,
-                       #width=150,
+                       #width=150, #HAVING A PRESET WIDTH CAUSED ISSUES
                        stretch=YES)
         db_view.column("PRICE",
                        anchor=CENTER,
-                       #width=150,
+                       #width=150, #HAVING A PRESET WIDTH CAUSED ISSUES
                        stretch=YES)
         db_view.column("COST",
                        anchor=CENTER,
-                       #width=150,
+                       #width=150, #HAVING A PRESET WIDTH CAUSED ISSUES
                        stretch=YES)
         db_view.column("CATEGORY",
                        anchor=CENTER,
-                       #width=150,
+                       #width=150, #HAVING A PRESET WIDTH CAUSED ISSUES
                        stretch=YES)
 
-        #DATABASE VIEW COLUMN HEADINGS
+        #DATABASE VIEW COLUMN HEADINGS, NAME AND LOCATION
         db_view.heading("#0",text="")
         db_view.heading("ID", text="ID", anchor=W)
         db_view.heading("NAME", text="NAME", anchor=CENTER)
@@ -232,7 +243,7 @@ class DatabaseWindow:
         for child in db_entry_frame.winfo_children():
             child.configure(font=('Times',18))
 
-        #CLEAR RECORD ENTRIES FROMT HE DATABASE
+        #CLEAR RECORD ENTRIES FROM THE DATABASE
         def clear_record():
             product_ID_entry.delete(0,END)
             db_name_entry.delete(0,END)
@@ -241,7 +252,7 @@ class DatabaseWindow:
             db_cost_entry.delete(0, END)
             db_category_entry.delete(0, END)
 
-        #SELECT ENTRIES FROM THE DATABASE
+        # SELECT ENTRIES FROM THE DATABASE
         # DELETE WHAT IS IN THE BOXES
         def select_record(x):
             product_ID_entry.delete(0,END)
@@ -255,6 +266,8 @@ class DatabaseWindow:
             selected_record=db_view.focus()
             selected_values=db_view.item(selected_record,'values')
 
+            # PUT THE SELECTED VALUES FROM THE DATABASE VIEW
+            # INTO THE ENTRY BOXES FOR EDITING
             product_ID_entry.insert(0, selected_values[0])
             db_name_entry.insert(0, selected_values[1])
             db_sellPrice_entry.insert(0, selected_values[2])
@@ -262,10 +275,14 @@ class DatabaseWindow:
             db_cost_entry.insert(0, selected_values[4])
             db_category_entry.insert(0, selected_values[5])
 
+        # BIND THE SELECTION EVENT TO MOVE THE NEWLY SELECTED
+        # RECORD/ROW INTO THE ENTRY BOXES
         db_view.bind("<ButtonRelease-1>", select_record)
 
 
-        #CREATE A NEW FRAME TO ADD THE RECORD ENTRY AND DELETE BUTTONS
+        # CREATE A NEW FRAME TO ADD THE DATABASE BUTTONS
+        # ASSIGN NAMES AND FUNCTION TO EACH BUTTON
+        # REPLACE THE EXITING COMMAND FUNCTION WITH NEW FUNCTION
         db_button_frame = LabelFrame(canvas, text="Database Records Controls")
         db_button_frame.pack(fill="x", expand="yes", padx=10, pady=10)
 

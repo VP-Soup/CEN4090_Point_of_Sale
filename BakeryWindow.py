@@ -53,7 +53,7 @@ class Bakery:
         #CREATE A MENU BAR
         app_menu=Menu(self.root)
 
-        #FILE MENU ITEMS
+        #FILE MENU ITEMS; ONLY THE EXIT ACTUALLY DOES ANYTHING AT THE MOMENT
         file_menu = Menu(app_menu, tearoff=0)
         file_menu.add_command(label="New",)
         file_menu.add_command(label="Open", )
@@ -63,6 +63,9 @@ class Bakery:
         app_menu.add_cascade(label="File",menu=file_menu)
 
         #ADMINISTRATOR MENU OPTIONS
+        #LOGIN SHOWS THE LOGIN WINDOW
+        #LOGOUT WILL CLOSE THE OPEN WINDOW AND SHOW THE BAKERY WINDOW
+        #CHARTS REQUIRES NO LOGIN, SHOWS THE CHART WINDOW
         admin_menu = Menu(app_menu, tearoff=0)
         admin_menu.add_command(label="Login", command=lambda: showLoginWindow(self.root))
         admin_menu.add_command(label="Logout", command=doNothing())
@@ -71,6 +74,7 @@ class Bakery:
         app_menu.add_cascade(label="Admin", menu=admin_menu)
 
         #HELP MENU OPTIONS
+        #HAS THE ABOUT POPUP WINDOW THAT WILL LIST CODE AND TUTORIAL SOURCES
         help_menu=Menu(app_menu,tearoff=0)
         help_menu.add_command(label="Help",)
         help_menu.add_command(label="About",command=About.About)
@@ -80,7 +84,7 @@ class Bakery:
         self.scrollable_Button_Frame=ttk.Frame()
         self.create_main_window()
 
-    # BUTTON FRAME: CREATE A SCROLLABLE WINDOW TO SCROLL THE PRODUCT BUTTONS.
+    # BUTTON FRAME: CREATE A SCROLLABLE WINDOW TO ADD THE PRODUCT BUTTONS TO.
     def create_button_frame(self):
         bf = ttk.Style()
         bf.configure('new.TFrame', background='white', borderwidth=0, relief='flat')
@@ -113,6 +117,7 @@ class Bakery:
     # ASSIGN THE TEXT AND COMMANDS TO THE PRODUCT BUTTONS TO ALLOW FOR SELECTION BY PRODUCT
     # OR REASSIGNMENT TO A SPECIFIC CATEGORY SELECTED FROM THE HEADER BUTTONS
     def assign_product_buttons(self,var,data,Frame):
+        #NEED A SQL QUERY TO RETURN THE CATEGORIES
         pass
 
 
@@ -174,16 +179,15 @@ class Bakery:
         transaction_frame['relief']='raised'
         transaction_frame.place(relwidth = frame_rel_width, relheight = frame_rel_height,relx=0.5,rely=0.1)
 
-        #transaction FRAME STYLE WHERE ALL THE ITEMS FOR THIS TRANSACTION WILL BE DISPLAYED
+        #TRANSACTION FRAME STYLE - WHERE ALL THE ITEMS FOR THIS TRANSACTION WILL BE DISPLAYED
         rfs = ttk.Style()
-        # rfs.theme_use('default')
         rfs.configure("rs.Treeview",
                       background = frame_color,
                       foreground = "black",
                       rowheight = 25,
                       fieldbackground = frame_color,
                       font=(use_font, 20),
-                      sticky='nsew') # #D3D3D3
+                      sticky='nsew')
 
         rfs.configure('rs.Treeview.Heading',
                       font=(use_font,22))
@@ -212,12 +216,12 @@ class Bakery:
         transaction_frame_width = transaction_frame.winfo_screenwidth()
         print("transaction view width: ", transaction_frame_width)
 
-        #CREATE FRAME FOR THE TRANSACTION TOTAL
+        # CREATE FRAME FOR THE TRANSACTION TOTAL
         # tf=ttk.Style()
         # tf.configure('tf.TFrame',font=(use_font,22),foreground='black',background = "lightblue")
         total_frame = ttk.Frame(transaction_frame,width=transaction_frame_width)
         total_frame.pack()
-        #CREATE TRANSACTION LABEL AND TEXTBOX
+        # CREATE TRANSACTION LABEL AND TEXTBOX
         subtotal_textbox = ttk.Label(master=total_frame,
                                   text="Sub Total     $ 0.00",
                                   foreground = 'black',
@@ -255,6 +259,7 @@ class Bakery:
         psb = ttk.Style()
 
         # COLOR CODE THE CATEGORY TYPES FOR THE PRODUCTS
+        # FINISH THE COLOR CODING IF THERE IS TIME AT THE END
         for productID, name, quan, price, cost, cat in product_Data:
             x=''
             global category_bg_color
@@ -268,6 +273,11 @@ class Bakery:
                 bg_color=category_bg_color[3]
             elif cat=="Cookie":
                 bg_color=category_bg_color[4]
+
+            # THIS IS THE PUSH BUTTON CONFIGURATION. THE PRODUCT NAME AND PRODUCT PRICE DATA PULLED FROM THE DATABASE USING
+            # "product_Data = DataAccess.listAllProducts() PREVIOUSLY IS ADDED TO THE TRANSACTION TREE VIEW. THIS IS
+            # WHERE THE TRANSACTION ACTIONS ARE CONNECTED. CONNECT THE BUTTON TO THE TRANSACITON METHOD AND THEN HAVE THE
+            # TRANSACTION METHOD .INSERT INTO THE TRANSACTION VIEW.
             psb.configure('b.TButton', font=(use_font, 20), background=bg_color, foreground='black')
             selection_button=BakeryButton.BakeryButton(scrollable_Button_Frame,height = 100,width=235,text=name,
                                       style='b.TButton',command=lambda name=name,price=price: transaction_view.insert
@@ -280,19 +290,21 @@ class Bakery:
                 j += 1
             else:
                 i += 1
-
+# SHOW THE CHARTS WINDOW
 def showCharts(e):
     e.destroy()
     newRoot=Tk()
     application=Charts.Graph(newRoot)
     newRoot.mainloop()
 
+# SHOW THE LOGIN WINDOW TO GAIN ACCESS TO THE DATABASE VIEW
 def showLoginWindow(e):
     e.destroy()
     newRoot=Tk()
     application=LoginWindow.Login(newRoot)
     newRoot.mainloop()
 
+# A DO NOTHING METHOD
 def doNothing():
     pass
 
