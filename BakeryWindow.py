@@ -213,22 +213,26 @@ class Bakery:
         print("transaction view width: ", transaction_frame_width)
 
         #CREATE FRAME FOR THE TRANSACTION TOTAL
-        # tf=ttk.Style()
-        # tf.configure('tf.TFrame',font=(use_font,22),foreground='black',background = "lightblue")
-        total_frame = ttk.Frame(transaction_frame,width=transaction_frame_width)
+        tbf = ttk.Style()
+        tbf.configure('tbf.TFrame',
+                      background=frame_color,
+                      font=(use_font, 20),
+                      borderwidth=0,
+                      relief='flat')
+        total_frame = ttk.Frame(transaction_frame,width=transaction_frame_width,style='tbf.TFrame')
         total_frame.pack()
         #CREATE TRANSACTION LABEL AND TEXTBOX
         subtotal_textbox = ttk.Label(master=total_frame,
                                   text="Sub Total     $ 0.00",
                                   foreground = 'black',
-                                  # background=frame_color,
+                                  background=frame_color,
                                   padding=10,
                                   justify=tk.RIGHT)
         subtotal_textbox.pack(anchor='e')
         tax_textbox = ttk.Label(master=total_frame,
                                   text="Tax     $ 0.00",
                                   foreground = 'black',
-                                  #background=frame_color,
+                                  background=frame_color,
                                   padding=10,
                                   justify=tk.RIGHT)
         tax_textbox.pack(anchor='e')
@@ -236,20 +240,41 @@ class Bakery:
         total_textbox = ttk.Label(master=total_frame,
                                   text="Total     $ 0.00",
                                   foreground = 'black',
-                                  #background=frame_color,
+                                  background=frame_color,
                                   padding=10,
                                   justify=tk.RIGHT)
         total_textbox.pack(anchor='e')
 
-        checkout_button=tk.Button(master=total_frame,
-                                  text="CHECKOUT",
-                                  foreground='black',
-                                  #background=frame_color,
-                                  padx=20,
-                                  pady=20,
-                                  font=(use_font,36))
-        checkout_button.pack(anchor=CENTER)
 
+        transaction_button_frame=ttk.Frame(transaction_frame,width=transaction_frame_width,style='tbf.TFrame')
+        transaction_button_frame.columnconfigure(0, weight=1)
+        transaction_button_frame.columnconfigure(1, weight=1)
+        transaction_button_frame.columnconfigure(2, weight=1)
+        transaction_button_frame.pack(fill='both')
+        tfb=ttk.Style()
+        tfb_height = 60
+        tfb_width = 200
+        tfb.configure('tfb.TButton', font=(use_font, 20), background='grey', foreground='black')
+        remove_item_button=BakeryButton.BakeryButton(transaction_button_frame,
+                                                     height = tfb_height,
+                                                     width=tfb_width,
+                                                     text="REMOVE ITEM",
+                                                     style='tfb.TButton')
+        remove_item_button.grid(row=1,column=0,padx=20,pady=20)
+
+        discount_button = BakeryButton.BakeryButton(transaction_button_frame,
+                                                    height = tfb_height,
+                                                    width=tfb_width,
+                                                    text="APPLY DISCOUNT",
+                                                     style='tfb.TButton')
+        discount_button.grid(row=1,column=1,padx=20,pady=20)
+
+        checkout_button = BakeryButton.BakeryButton(transaction_button_frame,
+                                                    height = tfb_height,
+                                                    width=tfb_width,
+                                                    text="CHECKOUT",
+                                                     style='tfb.TButton')
+        checkout_button.grid(row=1,column=2,padx=20,pady=20)
 
         # CREATE A BUTTON FOR PRODUCT SELECTION
         psb = ttk.Style()

@@ -43,10 +43,10 @@ class Graph():
         window_center_y = int(screen_height / 2 - root_height / 2)
 
         # SET THE ROOT WINDOW LOCATION ON THE DISPLAY
-        self.root.geometry(f'{root_width}x{root_height}+{window_center_x}+{window_center_y}')
+        root.geometry(f'{root_width}x{root_height}+{window_center_x}+{window_center_y}')
 
         # CREATE A MENU BAR
-        app_menu = Menu(self.root)
+        app_menu = Menu(root)
 
         # FILE MENU ITEMS
         file_menu = Menu(app_menu, tearoff=0)
@@ -59,8 +59,8 @@ class Graph():
 
         # ADMINISTRATOR MENU OPTIONS
         admin_menu = Menu(app_menu, tearoff=0)
-        admin_menu.add_command(label="Login", command=lambda: BakeryWindow.showLoginWindow(self.root))
-        admin_menu.add_command(label="Logout", command=lambda: BakeryWindow.Bakery(self.root))
+        admin_menu.add_command(label="Login", command=lambda: BakeryWindow.showLoginWindow(root))
+        admin_menu.add_command(label="Logout", command=lambda: BakeryWindow.Bakery(root))
         admin_menu.add_separator()
         admin_menu.add_command(label="Charts", command=Graph.doNothing())
         app_menu.add_cascade(label="Admin", menu=admin_menu)
