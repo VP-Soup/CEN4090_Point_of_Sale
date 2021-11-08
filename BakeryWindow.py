@@ -120,7 +120,7 @@ class Bakery:
     def create_main_window(self):
 
         # GET THE PRODUCT INFORMATION FROM THE DATABASE:PRODUCT AND PUT INTO product_Data
-        product_Data = DataAccess.listAllProducts()  # get the names and prices from the product table
+        product_Data = DataAccess.listAllProduct()  # get the names and prices from the product table
         print("Prod_Data: ", product_Data )
         n = len(product_Data)  # get the length
         i = 0  # associate names and prices to the buttons

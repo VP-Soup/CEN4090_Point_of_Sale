@@ -13,7 +13,7 @@ from tkinter import *
 import tkinter as tk
 from tkinter import ttk
 import sqlite3
-
+from operator import itemgetter
 import BakeryButton, DataAccess,BakeryWindow,Charts,About
 
 
@@ -31,41 +31,16 @@ class DatabaseWindow:
         application = BakeryWindow.Bakery(newRoot)
         newRoot.mainloop()
 
+
     def __init__(self, root):
         #SET THE WINDOW DIMENSIONS
         root_width = 1900
         root_height = 1000
         button_width=175
         button_height=60
+
         self.root = root
         self.root.title('Database Entry')
-
-        # CREATE A MENU BAR
-        app_menu = Menu(self.root)
-
-        # FILE MENU ITEMS
-        file_menu = Menu(app_menu, tearoff=0)
-        file_menu.add_command(label="New", )
-        file_menu.add_command(label="Open", )
-        file_menu.add_command(label="Save", )
-        file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=root.destroy)
-        app_menu.add_cascade(label="File", menu=file_menu)
-
-        # ADMINISTRATOR MENU OPTIONS
-        admin_menu = Menu(app_menu, tearoff=0)
-        admin_menu.add_command(label="Login", command=lambda: BakeryWindow.showLoginWindow(self.root))
-        admin_menu.add_command(label="Logout", command=lambda: BakeryWindow.Bakery(self.root))
-        admin_menu.add_separator()
-        admin_menu.add_command(label="Charts", command=Charts.Graph)
-        app_menu.add_cascade(label="Admin", menu=admin_menu)
-
-        # HELP MENU OPTIONS
-        help_menu = Menu(app_menu, tearoff=0)
-        help_menu.add_command(label="Help", )
-        help_menu.add_command(label="About",command=About.About)
-        app_menu.add_cascade(label="Help", menu=help_menu)
-        self.root.config(menu=app_menu)
 
         #GET THE DISPLAY WINDOW DIMENSIONS
         screen_width=root.winfo_screenwidth()
@@ -90,12 +65,13 @@ class DatabaseWindow:
         db_style.configure('db.Treeview',
                            background="#eae1df",
                            foreground='black',
-                           rowheight=50,
+                           rowheight=40,
                            fieldbackground="#eae1df",
                            ipady=10,
                            font=('Times',20))
         db_style.configure('db.Treeview.Heading',
-                                   font=('Times',22,'bold'))
+                           rowheight=40,
+                           font=('Times',20,'bold'))
 
         db_style.map('db.Treeview',
                      background=[('selected','#347083')])
@@ -125,6 +101,7 @@ class DatabaseWindow:
 
 
         #CREATE COLUMN HEADERS FOR THE DATABASE AND FORMAT
+
         db_view['columns']=("ID","NAME","QUANTITY","PRICE","COST","CATEGORY")
         db_view.column("#0",
                        width=0,
@@ -134,34 +111,34 @@ class DatabaseWindow:
                        #width=150,
                        stretch=YES)
         db_view.column("NAME",
-                       anchor=CENTER,
+                       anchor=W,
                        #width=150,
                        stretch=YES)
         db_view.column("QUANTITY",
-                       anchor=CENTER,
+                       anchor=W,
                        #width=150,
                        stretch=YES)
         db_view.column("PRICE",
-                       anchor=CENTER,
+                       anchor=W,
                        #width=150,
                        stretch=YES)
         db_view.column("COST",
-                       anchor=CENTER,
+                       anchor=W,
                        #width=150,
                        stretch=YES)
         db_view.column("CATEGORY",
-                       anchor=CENTER,
+                       anchor=W,
                        #width=150,
                        stretch=YES)
 
         #DATABASE VIEW COLUMN HEADINGS
         db_view.heading("#0",text="")
         db_view.heading("ID", text="ID", anchor=W)
-        db_view.heading("NAME", text="NAME", anchor=CENTER)
-        db_view.heading("QUANTITY", text="QUANTITY", anchor=CENTER)
-        db_view.heading("PRICE", text="PRICE", anchor=CENTER)
-        db_view.heading("COST", text="COST", anchor=CENTER)
-        db_view.heading("CATEGORY", text="CATEGORY", anchor=CENTER)
+        db_view.heading("NAME", text="NAME", anchor=W)
+        db_view.heading("QUANTITY", text="QUANTITY", anchor=W)
+        db_view.heading("PRICE", text="PRICE", anchor=W)
+        db_view.heading("COST", text="COST", anchor=W)
+        db_view.heading("CATEGORY", text="CATEGORY", anchor=W)
 
         #SET ALTERNATING COLORS FOR THE DATABASE ENTRIES
         db_view.tag_configure('oddentry',background='#eae1df')
@@ -169,7 +146,7 @@ class DatabaseWindow:
 
 
         #SQL QUERY TO RETURN ALL THE PRODUCTS FROM THE DATABASE ADD ASSIGN COLORS TO THE ROWS
-        db_entry=DataAccess.listAllProducts()
+        db_entry=DataAccess.listAllProduct()
         for entry in db_entry:
             global count
             if count%2==0:
@@ -316,5 +293,127 @@ class DatabaseWindow:
                                                 width=button_width,
                                                 text="EXIT",command=lambda: DatabaseWindow.showBakeryWindow(self.root))
         exit_button.grid(row=1, column=3, padx=10, pady=10, ipadx=10, ipady=10)
+
+        # CREATE A MENU BAR
+        app_menu = Menu(self.root)
+
+        # FILE MENU ITEMS
+        file_menu = Menu(app_menu, tearoff=0)
+        file_menu.add_command(label="New", )
+        file_menu.add_command(label="Open", )
+        file_menu.add_command(label="Save", )
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=root.destroy)
+        app_menu.add_cascade(label="File", menu=file_menu)
+
+        # ADMINISTRATOR MENU OPTIONS
+        admin_menu = Menu(app_menu, tearoff=0)
+        admin_menu.add_command(label="Login", command=lambda: BakeryWindow.showLoginWindow(self.root))
+        admin_menu.add_command(label="Logout", command=lambda: BakeryWindow.Bakery(self.root))
+        admin_menu.add_separator()
+        admin_menu.add_command(label="Charts", command=Charts.Graph)
+        app_menu.add_cascade(label="Admin", menu=admin_menu)
+
+
+        # DATABASE MENU OPTIONS GET TABLE NAMES AND ADD TO THE MENU
+        dbase_menu = Menu(app_menu, tearoff=0)
+        table_names = DataAccess.listTables()
+        for table in table_names:
+            # QUERY STRING TO A COMMAND FOR LISTALL"TABLE"()
+            # PASS TO THE SETUP FUNCTION THE VIEW TO USE, THE TRANSACTION CLASS FUNCTION TO USE
+            # AND THE TABLE THAT IS BEING USED
+            # sql_query_command = f"{table}"
+            # print("table: query:", table, sql_query_command)
+            dbase_menu.add_command(label=table,
+                                   command=lambda view=db_view, boundm=table: setUp(self, view, getMenuItemCommand(boundm), boundm))
+        app_menu.add_cascade(label="Database", menu=dbase_menu) # ADD MENU ITEMS TO THE WINDOW TITLE BAR
+
+
+        def getMenuItemCommand(tag):
+            command=f"view{tag}Table"
+            return command
+        # HELP MENU OPTIONS
+        help_menu = Menu(app_menu, tearoff=0)
+        help_menu.add_command(label="Help", )
+        help_menu.add_command(label="About", command=About.About)
+        app_menu.add_cascade(label="Help", menu=help_menu)
+        self.root.config(menu=app_menu)
+
+        # SETUP FUNCTION TO POPULATE THE DATABASE VIEW WITH DIFFERENT MENU SELECTIONS
+        def setUp(self,view,query:str,table):
+            db_columns_names = []  # TABLE NAMES RETRIEVED FROM A TABLE
+            count = 0  # ODD AND EVEN ROWS WILL BE DIFFERENT BG COLORS ALSO USED FOR IID
+
+            for i in view.get_children(): # CLEAR THE TREEVIEW OF EXISTING ENTRIES
+                view.delete(i)
+
+            # CHECK IF THE QUERY EXIST IN THE DataAccess LAYER AND THEN REQUEST
+            # THE *'VARIABLE', REPRESENTS A TUPLE TO RECEIVE DATA - GOOD TO REMEMBER
+            # DATA RETURNED FROM THE QUERY TO PULL APART HAVE TO HAVE cur
+            cur=()
+            if hasattr(DataAccess,query) and callable(func := getattr(DataAccess,query)): #IF THE FUNCTION EXIST CALL IT
+                *cur,=func()
+            n = len(cur[0].description)     # THE CURSER.DESCRIPTION HAS THE COLUMN NAMES IN IT
+            if n>0:
+                db_entry_frame.winfo_children()
+                for widget in db_entry_frame.winfo_children():
+                    widget.destroy()
+                l=Label()
+                e=Entry()
+                label_index=0
+                entry_index=0
+                column_number=0
+                row_number=0
+                for index in range(0, n):           # GET THE TABLE NAMES OUT FOR THE HEADERS
+                    db_columns_names.append(cur[0].description[index][0])
+                    l[label_index] = Label(db_entry_frame,
+                                               text=cur[0].description[label_index][0],
+                                               justify="right").grid(row=row_number,
+                                                                     column=column_number,
+                                                                     padx=20, pady=10)
+                    label_index+=1
+                    column_number+=1
+                    e[entry_index] = Entry(db_entry_frame,
+                                               width=30).grid(row=row_number,
+                                                              column=column_number,
+                                                              padx=20,
+                                                              pady=10)
+                    entry_index+=1
+                    column_number+=1
+                    if column_number==6:
+                        column_number=0
+                        row_number+=1
+                for child in db_entry_frame.winfo_children():
+                    child.configure(font=('Times', 18))
+            view['columns'] = db_columns_names  # DEFINE THE COLUMN NAMES AND HEADERS
+
+            for c in db_columns_names:          # LOOP THROUGH THE NAMES AND ADD THE HEADERS TO THE VIEW
+                view.column(c,anchor=W,stretch=YES)
+
+            # DATABASE VIEW COLUMN HEADINGS
+            for c in db_columns_names:          # SET THE HEADINGS
+                view.heading(c, text=c, anchor=W)
+
+                # SET ALTERNATING COLORS FOR THE DATABASE ENTRIES
+                view.tag_configure('oddentry', background='#eae1df')
+                view.tag_configure('evenentry', background='#f1b0a2')
+
+            # MAKE UP THE QUERY NAME TO CALL
+            # CHECK IF THE QUERY EXIST IN THE DataAccess LAYER AND THEN REQUEST
+            # THE DATA AND PUT IT IN DB_ENTRY
+            db_entry=()
+            list_all_query=f"listAll{table}"
+            if hasattr(DataAccess, list_all_query) and callable(func := getattr(DataAccess, list_all_query)):
+                db_entry = func()               # DATA FROM THE TABLE
+
+            entry_length=len(db_entry)          # LENGTH OF DATA TUPLES TO LOOP THROUGHT
+            for index in range(entry_length):   # LOOP THROUGH THE DATA AND ENTER IT INTO THE DATABASE VIEW
+                if (count%2==0):                # SET THIS ROW WITH A BACKGROUND COLOR DIFFERENT THAN THE NEXT
+                    db_view.insert("", 'end', iid=count, text='', values=db_entry[index], tags=('evenentry',))
+                elif (count%2==1):
+                    db_view.insert("",'end', iid=count, text='', values=db_entry[index], tags=('oddentry',))
+                count+= 1
+                index+=1
+
 
         root.mainloop()
