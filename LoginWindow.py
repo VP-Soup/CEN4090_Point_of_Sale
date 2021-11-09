@@ -5,7 +5,7 @@ from BakeryWindow import *
 from DatabaseWindow import *
 from tkinter import *
 from tkinter import ttk
-
+import time
 
 class Login:
 
@@ -65,9 +65,9 @@ class Login:
 
         # NEED TO FIX Button border to 0
 
-        button_frame=Frame(self.root)
-        button_frame.pack()
-        self.LoginButton = ttk.Button(button_frame,text='LOGIN',command=self.login_user, image = self.login_btn).pack()
+        self.button_frame=Frame(self.root)
+        self.button_frame.pack()
+        self.LoginButton = Button(self.button_frame,borderwidth = 0,bg='white',command=self.login_user, image = self.login_btn).pack()
 
         #IF ENTER IS PRESSED SPECIFICALLY AFTER ENTERING THE PASSWORD ACK LIKE PRESSING THE LOGIN BUTTON
         def callback(event):
@@ -76,14 +76,14 @@ class Login:
         # IF ENTER IS PRESSED SPECIFICALLY AFTER ENTERING THE PASSWORD ACK LIKE PRESSING THE LOGIN BUTTON
         root.bind('<Return>',callback)
 
-    def login_user(self):
 
+    def login_user(self):
 
         # We are getting admin 123
         # -1 - returned from the DAL for "admin" and "123" - should return 1
         # we need to fix this error
 
-        if validateLoginCredentials(self.username.get().encode(),self.password.get().encode()):
+        if validateLoginCredentials(self.username.get(),self.password.get()) != -1:
 
             #Do the work done by the main of DBMSproject.py
 
@@ -96,7 +96,7 @@ class Login:
             newroot.mainloop()
         else:
             '''Prompt user that either id or password is wrong'''
-            msg_frame=Frame(self.root)
-            msg_frame.pack(anchor=CENTER)
-            self.message = Label(text = 'Username or Password incorrect. Try again!',fg = 'Red')
+            self.msg_frame=Frame(self.root)
+            self.msg_frame.pack(anchor=CENTER)
+            self.message = Label(self.msg_frame,text = 'Username or Password incorrect. Try again!',fg = 'Red', bg = 'white')
             self.message.pack()

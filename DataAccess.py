@@ -44,7 +44,7 @@ def validateLoginCredentials(user, password):
     except TypeError:
         return -1   # user not found in db
 
-    match_key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+    match_key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'),salt, 100000)
 
     return key == match_key
 
