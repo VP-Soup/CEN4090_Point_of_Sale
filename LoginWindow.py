@@ -21,7 +21,7 @@ class Login:
         self.root.title('LOGIN SCREEN')
         self.root.configure(background='white')
         root_width = 600
-        root_height = 600
+        root_height = 582
 
 
         # GET THE DISPLAY WINDOW DIMENSIONS
