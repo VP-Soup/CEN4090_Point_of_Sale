@@ -1,7 +1,4 @@
-import hashlib
-import os
 import sqlite3
-
 import bcrypt
 
 conn = sqlite3.connect('BakeryDatabase.db')
