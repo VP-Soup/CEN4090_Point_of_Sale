@@ -165,7 +165,6 @@ class DatabaseWindow:
 
         #ADD AN ENTRY FORM INTO THE PRODUCT DATABASE
         db_entry_frame=LabelFrame(canvas,text="Database Entry")
-        #db_entry_frame['borderwidth']=0
         db_entry_frame.pack(fill="x",expand=Y,padx=20,pady=20)
 
         #ADD PRODUCT ID LABEL TO THE GRID
@@ -209,7 +208,7 @@ class DatabaseWindow:
         for child in db_entry_frame.winfo_children():
             child.configure(font=('Times',18))
 
-        #CLEAR RECORD ENTRIES FROMT HE DATABASE
+        #CLEAR RECORD ENTRIES FROM THE DATABASE
         def clear_record():
             product_ID_entry.delete(0,END)
             db_name_entry.delete(0,END)
@@ -228,10 +227,11 @@ class DatabaseWindow:
             db_cost_entry.delete(0, END)
             db_category_entry.delete(0, END)
 
-            # REPOPULATE THE BOXES WITH THE SELECTED DATA FROM THE TABLE
+            # RE-POPULATE THE BOXES WITH THE SELECTED DATA FROM THE TABLE
             selected_record=db_view.focus()
             selected_values=db_view.item(selected_record,'values')
 
+            # Enter the selected record into the textboxes
             product_ID_entry.insert(0, selected_values[0])
             db_name_entry.insert(0, selected_values[1])
             db_sellPrice_entry.insert(0, selected_values[2])
@@ -239,7 +239,7 @@ class DatabaseWindow:
             db_cost_entry.insert(0, selected_values[4])
             db_category_entry.insert(0, selected_values[5])
 
-        db_view.bind("<ButtonRelease-1>", select_record)
+        db_view.bind("<ButtonRelease-1>", select_record)    # Bind a button event to a record selection
 
 
         #CREATE A NEW FRAME TO ADD THE RECORD ENTRY AND DELETE BUTTONS
@@ -325,7 +325,7 @@ class DatabaseWindow:
             # sql_query_command = f"{table}"
             # print("table: query:", table, sql_query_command)
             dbase_menu.add_command(label=table,
-                                   command=lambda view=db_view, boundm=table: setUp(self, view, getMenuItemCommand(boundm), boundm))
+                                   command=lambda view=db_view, boundm=table: setUp(view, getMenuItemCommand(boundm), boundm))
         app_menu.add_cascade(label="Database", menu=dbase_menu) # ADD MENU ITEMS TO THE WINDOW TITLE BAR
 
 
@@ -340,7 +340,8 @@ class DatabaseWindow:
         self.root.config(menu=app_menu)
 
         # SETUP FUNCTION TO POPULATE THE DATABASE VIEW WITH DIFFERENT MENU SELECTIONS
-        def setUp(self,view,query:str,table):
+        def setUp(view,query,table):
+
             db_columns_names = []  # TABLE NAMES RETRIEVED FROM A TABLE
             count = 0  # ODD AND EVEN ROWS WILL BE DIFFERENT BG COLORS ALSO USED FOR IID
 
@@ -409,11 +410,12 @@ class DatabaseWindow:
             entry_length=len(db_entry)          # LENGTH OF DATA TUPLES TO LOOP THROUGHT
             for index in range(entry_length):   # LOOP THROUGH THE DATA AND ENTER IT INTO THE DATABASE VIEW
                 if (count%2==0):                # SET THIS ROW WITH A BACKGROUND COLOR DIFFERENT THAN THE NEXT
-                    db_view.insert("", 'end', iid=count, text='', values=db_entry[index], tags=('evenentry',))
+                    view.insert("", 'end', iid=count, text='', values=db_entry[index], tags=('evenentry',))
                 elif (count%2==1):
-                    db_view.insert("",'end', iid=count, text='', values=db_entry[index], tags=('oddentry',))
+                    view.insert("",'end', iid=count, text='', values=db_entry[index], tags=('oddentry',))
                 count+= 1
                 index+=1
 
+            view.bind("<ButtonRelease-1>", select_record)  # Bind a button event to a record selection
 
         root.mainloop()

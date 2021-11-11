@@ -19,14 +19,19 @@ def listTables():
 
 #################################### Employee ####################################
 # Prints every row in the employee table
+# Rob- changed return for the database window
 def viewEmployeeTable():
-    print('\nEmployee Table:')
-    for x in cur.execute('''SELECT * FROM Employee'''):
-        print(x)
+    # print('\nEmployee Table:')
+    # for x in cur.execute('''SELECT * FROM Employee'''):
+    #     print(x)
+    data = cur.execute('''SELECT * FROM Employee''')
+    return (cur, *data)
 
 
 # Returns list of entire employee table
-def listAllEmployees():
+# Rob - removed the 's' from Employees to make the call
+# the same ie. alwasys 'Employee'
+def listAllEmployee():
     cur.execute('''SELECT * FROM Employee''')
     return cur.fetchall()
 
@@ -90,14 +95,18 @@ def deleteEmployee(empID):
 
 #################################### Product ####################################
 # Prints every row in the product table
+# Rob- changed to get all the columns and data
+# Returned the cursor data
 def viewProductTable():
-    print('\nProduct Table:')
-    for x in cur.execute('''SELECT * FROM Product'''):
-        print(x)
-
+    #print('\nProduct Table:')
+    #for x in cur.execute('''SELECT * FROM Product'''):
+     #   print(x)
+    data=cur.execute('''SELECT * FROM Product''')
+    cur.fetchall()
+    return (cur,*data)
 
 # Returns a List of all rows in the table
-def listAllProducts():
+def listAllProduct():
     cur.execute('''SELECT * FROM Product''')
     return cur.fetchall()
 
@@ -105,7 +114,7 @@ def listAllProducts():
 # Return Array of all product attributes from ID
 def getProductFromID(prodID):
     cur.execute('''SELECT * FROM Product where ProductID=?''', (prodID,))
-    return cur.fetchone()
+    return cur.fetchone()[0]
 
 
 # Returns Product Name
@@ -137,6 +146,12 @@ def getProductCategoryFromID(prodID):
     cur.execute('''SELECT Category FROM Product where ProductID=?''', (prodID,))
     return cur.fetchone()[0]
 
+
+# Returns All Product Category
+# Rob-added this to get all the categories
+def getProductCategory():
+    data=cur.execute('''SELECT Category FROM Product''')
+    return data
 
 # Inserts a new Product record into the Product table
 def insertProduct(name = "", quantity= 0, sellP=0, cost=0, category=""):
@@ -173,10 +188,11 @@ def deleteProduct(prodID):
 #################################### Transactions ####################################
 # Prints every row in the Transactions table
 def viewTransactionsTable():
-    print('\nTransactions Table:')
-    for x in cur.execute('''SELECT * FROM Transactions'''):
-        print(x)
-
+    # print('\nTransactions Table:')
+    # for x in cur.execute('''SELECT * FROM Transactions'''):
+    #     print(x)
+    data=cur.execute('''SELECT * FROM Transactions''')
+    return (cur,*data)
 
 # Returns a List of all rows in the table
 def listAllTransactions():
@@ -258,14 +274,17 @@ def deleteTransaction(tranID):
 
 #################################### Transactions_Item ####################################
 # Prints every row in the Transactions_Item table
-def viewTran_ItemTable():
-    print('\nTransactions_Item Table:')
-    for x in cur.execute('''SELECT * FROM Transactions_Item'''):
-        print(x)
-
+# Rob-changed to get data for database view
+def viewTransactions_ItemTable():
+    # print('\nTransactions_Item Table:')
+    # for x in cur.execute('''SELECT * FROM Transactions_Item'''):
+    #     print(x)
+    data=cur.execute('''SELECT * FROM Transactions_Item''')
+    return(cur,*data)
 
 # Returns a List of all rows in the table
-def listAllTran_Item():
+# Rob-changed to make the 'tran' to 'transactions' like the others
+def listAllTransactions_Item():
     cur.execute('''SELECT * FROM Transactions_Item''')
     return cur.fetchall()
 
