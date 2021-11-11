@@ -42,15 +42,14 @@ def getEmployeeNameFromID(empID):
 # Returns True/False if user/pass do/don't match, or -1 if user was not found in db
 def validateLoginCredentials(user, password):
     try:
-        key, salt = cur.execute("SELECT Password, PasswordSalt FROM Employee WHERE Username = ?", (user,)).fetchone()
+        key = cur.execute("SELECT Password FROM Employee WHERE Username = ?", (user,)).fetchone()[0]
     except TypeError:
         return -1   # user not found in db
 
     password_bytes = bytes(password, encoding='utf-8')
     key_bytes = bytes(key, encoding='utf-8')
-    salt_bytes = bytes(salt, encoding='utf-8')
 
-    return bcrypt.checkpw(password_bytes, key_bytes)
+    return 1 if bcrypt.checkpw(password_bytes, key_bytes) else 0
 
 
 # Returns array containing an Employee's attributes from login credentials
@@ -61,15 +60,13 @@ def getEmployeeFromLogin(user, pas):
 
 # Inserts a new Employee record into the Employee table
 def insertEmployee(firstName='', lastName='', username='', password=''):
-    salt = bcrypt.gensalt()                             # get random password salt
-    password_bytes = bytes(password, encoding='utf-8')  # encode password
-    key = bcrypt.hashpw(password_bytes, salt)           # encrypt password
+    password_bytes = bytes(password, encoding='utf-8')              # encode password
+    key = bcrypt.hashpw(password_bytes, bcrypt.gensalt())           # encrypt password
 
-    param_salt = salt.decode('utf-8')
     param_pass = key.decode('utf-8')
 
-    cur.execute('''INSERT INTO Employee (FirstName, LastName, Username, Password, PasswordSalt) VALUES (?, ?, ?, ?, ?)''',
-                       (firstName, lastName, username, param_pass, param_salt))
+    cur.execute('''INSERT INTO Employee (FirstName, LastName, Username, Password) VALUES (?, ?, ?, ?)''',
+                       (firstName, lastName, username, param_pass))
     conn.commit()
     return "Employee Inserted"
 
