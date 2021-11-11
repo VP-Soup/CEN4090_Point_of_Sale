@@ -88,13 +88,13 @@ conn.commit()
 ## Populate tables ##
 
 # Employees
-emp = [["Sally", "Smith", "admin", "123"], ["John", "Doe", "user1", "123"], ["Heather", "Robbins", "user2", "123"]]
-for x in emp:
-    salt = os.urandom(64)   # generate a random password salt
-    key = hashlib.pbkdf2_hmac('sha256', x[3].encode('utf-8'), salt, 100000)     # hash password
-    x[3] = str(key)         # replace plain-text password with hashed password
-    x.append(str(salt))     # save password salt
-    cur.execute('''INSERT INTO Employee(FirstName, LastName, Username, Password, PasswordSalt) VALUES(?,?,?,?,?)''', x)
+# emp = [["Sally", "Smith", "admin", "123"], ["John", "Doe", "user1", "123"], ["Heather", "Robbins", "user2", "123"]]
+# for x in emp:
+#     salt = os.urandom(64)   # generate a random password salt
+#     key = hashlib.pbkdf2_hmac('sha256', x[3].encode('utf-8'), salt, 100000)     # hash password
+#     x[3] = str(key)         # replace plain-text password with hashed password
+#     x.append(str(salt))     # save password salt
+#     cur.execute('''INSERT INTO Employee(FirstName, LastName, Username, Password, PasswordSalt) VALUES(?,?,?,?,?)''', x)
 
 # Products 
 prod = [["Chocolate Chip Cookie", 48, 1.50, .25, "Cookie"], ["Sugar Cookie", 24, 1.50, .15, "Cookie"], 

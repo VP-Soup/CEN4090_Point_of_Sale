@@ -2,6 +2,8 @@ import hashlib
 import os
 import sqlite3
 
+import bcrypt
+
 conn = sqlite3.connect('BakeryDatabase.db')
 cur = conn.cursor()
 cur.execute('''PRAGMA foreign_keys = ON''')
@@ -44,9 +46,11 @@ def validateLoginCredentials(user, password):
     except TypeError:
         return -1   # user not found in db
 
-    match_key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)
+    password_bytes = bytes(password, encoding='utf-8')
+    key_bytes = bytes(key, encoding='utf-8')
+    salt_bytes = bytes(salt, encoding='utf-8')
 
-    return key == match_key
+    return bcrypt.checkpw(password_bytes, key_bytes)
 
 
 # Returns array containing an Employee's attributes from login credentials
@@ -57,11 +61,15 @@ def getEmployeeFromLogin(user, pas):
 
 # Inserts a new Employee record into the Employee table
 def insertEmployee(firstName='', lastName='', username='', password=''):
-    salt = os.urandom(64)   # generate random password salt
-    key = hashlib.pbkdf2_hmac('sha256', password.encode('utf-8'), salt, 100000)     # encode password
+    salt = bcrypt.gensalt()                             # get random password salt
+    password_bytes = bytes(password, encoding='utf-8')  # encode password
+    key = bcrypt.hashpw(password_bytes, salt)           # encrypt password
+
+    param_salt = salt.decode('utf-8')
+    param_pass = key.decode('utf-8')
 
     cur.execute('''INSERT INTO Employee (FirstName, LastName, Username, Password, PasswordSalt) VALUES (?, ?, ?, ?, ?)''',
-                       (firstName, lastName, username, key, salt))
+                       (firstName, lastName, username, param_pass, param_salt))
     conn.commit()
     return "Employee Inserted"
 
