@@ -11,7 +11,7 @@ class LineItem:
         self.itemID = itemID
         self.quantity = quantity
         self.price = getProductCostFromID(itemID)
-        self.nameID = itemID
+        self.nameID = getProductNameFromID(itemID)
         self.tid = tid
 
     # method to increment quantity by an amount
@@ -21,7 +21,7 @@ class LineItem:
     def increment_quantity(self, itemID, amount):
         if self.itemID == itemID and amount <= self.quantity:
             self.quantity += amount
-            self.price += getProductCostFromID(itemID) * amount
+            self.price = getProductCostFromID(itemID) * self.quantity
             return self.quantity
         else:
             return -1
@@ -39,6 +39,12 @@ class LineItem:
     def get_price(self):
         return self.price
 
+    def clear_line(self):
+        self.itemID = ""
+        self.quantity = 0
+        self.price = 0
+        self.nameID = ""
+        self.tid = ""
 
 # class represents the total transaction
 class Transaction:
@@ -66,10 +72,12 @@ class Transaction:
 
     # method to entirely remove an item from the transaction
     def remove_item(self, itemID):
+        index=0
         for line in self.lines:
-            if line.get_itemID == itemID:
-                del line
+            if line.get_itemID() == itemID:
+                del self.lines[index]
                 return
+            index+=1
         return print("Error: No such item in transaction.")
 
     # replace with method to connect to GUI Receipt area or File output
@@ -99,15 +107,16 @@ class Transaction:
     # method to clear transaction of all values
     def clear_transaction(self):
         for line in self.lines:
-            del line
+            LineItem.clear_line(line)
         self.update_price()
+        self.change_returned=0.0
 
     # called at the end of the transaction
     def finalize_transaction(self, cash_status, cash_amount):
         self.update_price()
         self.cash_method = cash_status
         self.cash_received = cash_amount
-        self.change_returned = self.final_cost - self.cash_received
+        self.change_returned = self.cash_received - self.final_cost
         self.transaction_status = 1
         # insert into DB
         self.print_receipt()
