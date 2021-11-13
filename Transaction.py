@@ -11,7 +11,7 @@ class LineItem:
         self.itemID = itemID
         self.quantity = quantity
         self.price = getProductCostFromID(itemID)
-        self.nameID = itemID
+        self.nameID = getProductNameFromID(itemID) #changed the the fn call instead of assigning itemID -Rob
         self.tid = tid
 
     # method to increment quantity by an amount
@@ -21,8 +21,8 @@ class LineItem:
     def increment_quantity(self, itemID, amount):
         if self.itemID == itemID and amount <= self.quantity:
             self.quantity += amount
-            self.price += getProductCostFromID(itemID) * amount
-            return self.quantity
+            self.price = getProductCostFromID(itemID) * self.quantity
+            return self
         else:
             return -1
 
@@ -65,11 +65,14 @@ class Transaction:
         return
 
     # method to entirely remove an item from the transaction
+    # Rob-added the index and changed to del self.lines[index]
     def remove_item(self, itemID):
+        index=0
         for line in self.lines:
-            if line.get_itemID == itemID:
-                del line
+            if line.get_itemID() == itemID:
+                del self.lines[index]
                 return
+            index+=1
         return print("Error: No such item in transaction.")
 
     # replace with method to connect to GUI Receipt area or File output
@@ -107,8 +110,7 @@ class Transaction:
         self.update_price()
         self.cash_method = cash_status
         self.cash_received = cash_amount
-        self.change_returned = self.final_cost - self.cash_received
+        self.change_returned = self.cash_received - self.final_cost
         self.transaction_status = 1
         # insert into DB
         self.print_receipt()
-
