@@ -82,6 +82,7 @@ class Bakery:
         admin_menu.add_command(label="Login", command=lambda: showLoginWindow(self.root))
         admin_menu.add_command(label="Logout", command=doNothing())
         admin_menu.add_separator()
+        admin_menu.add_command(label="Database", command=lambda: showDatabaseWindow(self.root))
         admin_menu.add_command(label="Charts",command=lambda: showCharts(self.root))
         app_menu.add_cascade(label="Admin", menu=admin_menu)
 
@@ -608,6 +609,12 @@ def showCharts(e):
     application=Charts.Graph(newRoot)
     newRoot.mainloop()
 
+#show the database window view
+def showDatabaseWindow(e):
+    e.destroy()
+    newRoot=Tk()
+    application=DatabaseWindow.DatabaseWindow(newRoot)
+    newRoot.mainloop()
 
 # Show the login window to get to the database view
 def showLoginWindow(e):
