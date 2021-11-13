@@ -10,11 +10,11 @@
 ##            pythonguides.com, anzeljg.github.io, & pythontutorial.net                                 ##
 ## Date: 06NOV21                                                                                        ##
 ##########################################################################################################
-
+import tkinter
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
-from tkinter import simpledialog
+from tkinter import simpledialog,messagebox
 from operator import itemgetter
 import DataAccess, LoginWindow, About,Charts,BakeryButton
 
@@ -30,9 +30,6 @@ button_bg_color = "#f1b0a2"
 category_bg_color=["#eba994","#e39888","#94a9eb","#94ebb8","#e7eb94"]
 use_font='Times'
 
-gbl_transaction_in_progress = False
-gbl_this_transaction=Transaction.Transaction(1)
-
 
 class Bakery:
     #DEFINE GLOBAL SETTING FOR ROOT WINDOW WIDTH AND HEIGHT
@@ -42,12 +39,22 @@ class Bakery:
     root_height = 1000
     global transaction_view_selected_item
     global transaction_item_id
+    global gbl_transaction_in_progress
+    global gbl_this_transaction
+    gbl_transaction_in_progress = False
+    gbl_this_transaction = Transaction.Transaction(1)       #setting up the transaction (empid)
 
 
+    ##################################################################################################
+    ## Creation of the initial Bakery window 'root'                                                 ##
+    ## Some initial settings to put the window in the middle of the monitor display                 ##
+    ## Add the menu item bar                                                                        ##
+    ##################################################################################################
     def __init__(self, root):
         self.root = root
         self.root.title('Bakery')
         self.root.iconbitmap('CakesBakery.png')
+        self.t=Transaction.Transaction(1)
 
         # GET THE DISPLAY WINDOW DIMENSIONS
         screen_width = root.winfo_screenwidth()
@@ -90,7 +97,11 @@ class Bakery:
         self.scrollable_Button_Frame=ttk.Frame()
         self.create_main_window()
 
-    # BUTTON FRAME: CREATE A SCROLLABLE WINDOW TO SCROLL THE PRODUCT BUTTONS.
+    ##################################################################################################
+    ## create_button_frame(self): Create a scrollable frame that the product selection buttons      ##
+    ##                            will be placed for the user to select products                    ##
+    ##                                                                                              ##
+    ##################################################################################################
     def create_button_frame(self):
         Bakery.transaction_item_id=()
         bf = ttk.Style()
@@ -120,36 +131,39 @@ class Bakery:
         scrollbar.pack(side="right", fill="y")
         return scrollable_button_frame
 
-
+    ##################################################################################################
+    ## assign_product_buttons(self,var,data,Frame): Dynamically create filter buttons based on the  ##
+    ##                            product categories that are in the product database 'category'    ##
+    ##                            column. This is an added feature if there is time. Have been able ##
+    ##                            to create the buttons dynamically elsewhere just need to finish   ##
+    ##################################################################################################
     # ASSIGN THE TEXT AND COMMANDS TO THE PRODUCT BUTTONS TO ALLOW FOR SELECTION BY PRODUCT
     # OR REASSIGNMENT TO A SPECIFIC CATEGORY SELECTED FROM THE HEADER BUTTONS
     def assign_product_buttons(self,var,data,Frame):
         pass
 
-
+    ##################################################################################################
+    ## create_main_window(self): Create the main window and all other features. Buttons, transaction##
+    ##                           item list, add and remove items, checkout, etc...                  ##
+    ##                                                                                              ##
+    ##################################################################################################
     #CREATE THE MAIN PORTION OF THE WINDOW,,,ADD THE BUTTONS FOR CHECKOUT SELECTION, ADD THE TOTAL WINDOW AND TOTAL LABEL
     def create_main_window(self):
+        global root_width
+        global root_height
         transaction_item_id=()
 
-        # Get the transaction view selected item to be used in the function selection
+        ##################################################################################################
+        ## selected_line_item(x): Determine what line item has focus in the transaction view "treeview" ##
+        ##                        Get the transaction view selected item to be used in the function     ##
+        ##                        selection                                                             ##
+        ##################################################################################################
         def selected_line_item(x):
             selected_item = transaction_view.focus()  # The line item that has focus
             Bakery.transaction_view_selected_item = transaction_view.item(selected_item, 'values')
             Bakery.transaction_item_id = Bakery.transaction_view_selected_item
             return Bakery.transaction_item_id
 
-        def delete_selected():  # Delete the item selected
-            try:
-                x = transaction_view.selection()[0]  # Get the selected item
-                transaction_view.delete(x)  # Delete the selected item
-                i = int(Bakery.transaction_item_id[1])  # Covert the string to int
-                gbl_this_transaction.remove_item(i)  # Delete the item from the transaction line item
-                gbl_this_transaction.update_price()
-                subtotal_textbox.config(text="Sub Total     $ {:.2f}".format(gbl_this_transaction.pre_tax))
-                tax_textbox.config(text="Tax     {:.0f} %".format(float(((gbl_this_transaction.tax-1)*100))))
-                total_textbox.config(text="Total     $ {:.2f}".format(gbl_this_transaction.final_cost))
-            except:
-                showPopUp_ItemNotSelected("Please make an item selection and try again")
 
 
         # GET THE PRODUCT INFORMATION FROM THE DATABASE:PRODUCT AND PUT INTO product_Data
@@ -164,8 +178,8 @@ class Bakery:
         query = 'getProductCategory'
         if hasattr(DataAccess, query) and callable(func := getattr(DataAccess, query)):  # IF THE FUNCTION EXIST CALL IT
             *product_data_categories, = func()
-        n = len(product_data_categories)  # THE CATEGORY TYPES HAS THE COLUMN NAMES IN IT
-        if n > 0:
+        n = len(product_data_categories)  # THE CATEGORY TYPES HAVE THE COLUMN NAMES IN IT
+        if n > 0:                           # If there are any, loop through and add them
             index = 0
             for quick_links in product_data_categories:
                 db_product_categories = list(map(itemgetter(index), product_Data))
@@ -248,13 +262,7 @@ class Bakery:
         transaction_view.heading("PRICE", text="PRICE", anchor=E)
         transaction_view.bind('<ButtonRelease-1>', selected_line_item)
         transaction_view.pack()
-
-        # WHAT LINEITEM IS SELECTED IN THE TRANSACTION VIEW
-
-        print("Selected Line Item: ",selected_line_item)
-
         transaction_frame_width = transaction_frame.winfo_screenwidth()
-        print("transaction view width: ", transaction_frame_width)
 
         #CREATE FRAME FOR THE TRANSACTION TOTAL
         tbf = ttk.Style()
@@ -263,12 +271,14 @@ class Bakery:
                       font=(use_font, 20),
                       borderwidth=0,
                       relief='flat')
-        total_frame = ttk.Frame(transaction_frame,width=transaction_frame_width,style='tbf.TFrame')
+        total_frame = ttk.Frame(transaction_frame,
+                                width=transaction_frame_width,
+                                style='tbf.TFrame')
         total_frame.pack()
 
         #CREATE TRANSACTION LABEL AND TEXTBOX
         subtotal_textbox= Label(master=total_frame,
-                                 text="Sub Total     $ {:.2f}".format(gbl_this_transaction.pre_tax),
+                                 text="Sub Total     $ {:.2f}".format(self.t.pre_tax),    #gbl_this_transaction.pre_tax
                                  foreground = 'black',
                                  background=frame_color,
                                  padx=10,
@@ -277,7 +287,7 @@ class Bakery:
                                  justify=tk.RIGHT)
         subtotal_textbox.pack(anchor='e')
         tax_textbox = Label(master=total_frame,
-                            text="Tax     {:.0f} %".format(float(((gbl_this_transaction.tax-1)*100))),
+                            text="Tax     {:.0f} %".format(float(((self.t.tax-1)*100))),  #gbl_this_transaction.tax
                             foreground = 'black',
                             background=frame_color,
                             padx=10,
@@ -287,7 +297,7 @@ class Bakery:
         tax_textbox.pack(anchor='e')
 
         total_textbox = Label(master=total_frame,
-                              text="Total     $ {:.2f}".format(gbl_this_transaction.final_cost),
+                              text="Total     $ {:.2f}".format(self.t.final_cost),    #gbl_this_transaction.final_cost
                               foreground = 'black',
                               background=frame_color,
                               padx=10,
@@ -330,12 +340,15 @@ class Bakery:
                                                     text="APPLY\nDISCOUNT",
                                                      style='tfb.TButton')
         discount_button.grid(row=1,column=2,padx=20,pady=20)
-
+################
         checkout_button = BakeryButton.BakeryButton(transaction_button_frame,
                                                     height = tfb_height,
                                                     width=tfb_width,
                                                     text="CHECKOUT",
-                                                     style='tfb.TButton')
+                                                     style='tfb.TButton',
+                                                    command=lambda x=root_width,
+                                                                   y=root_height,
+                                                                   :checkOut_window(x,y,self.t)) #setup_Checkout(x,y,self.t)
         checkout_button.grid(row=1,column=3,padx=20,pady=20)
 
         # CREATE A BUTTON FOR PRODUCT SELECTION
@@ -361,7 +374,7 @@ class Bakery:
             # Add an item to the transaction
             psb.configure('b.TButton', font=(use_font, 20), foreground='black')
             selection_button = BakeryButton.BakeryButton(scrollable_Button_Frame, height=100, width=235, text=name,
-                                                         style='b.TButton', command=lambda id=productID:addItem(id))
+                                                         style='b.TButton', command=lambda id=productID:addItem(self.t,id))
             Grid.rowconfigure(scrollable_Button_Frame, j, weight=1)
             Grid.columnconfigure(scrollable_Button_Frame, i, weight=1)
             selection_button.grid(row=j + 1,column=i, sticky="NESW", padx=20,pady=20)
@@ -371,18 +384,18 @@ class Bakery:
             else:
                 i += 1
 
-##################################################################################
-## addItem(id): pass in the id and create a new line item to show               ##
-##              if the item exist already, increase quantity and price only     ##
-##              Update the transaction line items                               ##
-##################################################################################
-            def addItem(id):
+            ##################################################################################
+            ## addItem(id): pass in the id and create a new line item to show               ##
+            ##              If the item exist already, increase quantity and price only     ##
+            ##              Update the transaction line items                               ##
+            ##################################################################################
+            def addItem(t,id):
                 global gbl_transaction_in_progress
                 global gbl_this_transaction
                 existing_item_ids = ()
                 lookup_column = 2 - 1  # COLUMN NUMBER 2 HAS THE ITEMID ->SKU
                 if not gbl_transaction_in_progress:
-                    gbl_this_transaction=Transaction.Transaction(1)  # Create a new transaction, pass the employee id
+                    self.t=Transaction.Transaction(1)  #gbl_this_transaction=Transaction.Transaction(1) Create a new transaction, pass the employee id
                     gbl_transaction_in_progress = True
                 for child in transaction_view.get_children():
                     existing_item_ids=transaction_view.item(child)["values"]
@@ -399,59 +412,212 @@ class Bakery:
                             transaction_view.delete(child)
                             nt=Transaction.LineItem.increment_quantity(matched_lineitem,id,1)
                             transaction_view.insert(parent='', index=line_item_index, text='',
-                                                    values=(nt.nameID, nt.itemID, nt.quantity, "{:.2f}".format(nt.price)))
+                                                    values=(nt.nameID, nt.itemID, nt.quantity, "$ {:.2f}".format(nt.price)))
                             match_found = True  # If a match is found mark true and break the for loop
-                            gbl_this_transaction.increment_item(id, 1)
+                            self.t.increment_item(id, 1)  #gbl_this_transaction.increment_item(id, 1)
                             break
                         line_item_index += 1    # Tracking which line number the loop is on
 
                     if match_found == False:    # Match wasn't found insert line item
-                        gbl_this_transaction.increment_item(id,1)
+                        self.t.increment_item(id,1)   #gbl_this_transaction.increment_item(id,1)
                         nt=Transaction.LineItem(1, id, 1)
                         transaction_view.insert(parent='', index='end', text='',
-                                                values=(nt.nameID, nt.itemID, nt.quantity, "{:.2f}".format(nt.price)))
+                                                values=(nt.nameID, nt.itemID, nt.quantity, "$ {:.2f}".format(nt.price)))
 
                 else:   # It is the first entry insert the item
-                    gbl_this_transaction.increment_item(id,1)
+                    self.t.increment_item(id,1)   #gbl_this_transaction.increment_item(id,1)
                     nt=Transaction.LineItem(1, id, 1)
                     transaction_view.insert(parent='',
                                             index='end',
                                             text='',
                                             values=(nt.nameID,nt.itemID,nt.quantity,"{:.2f}".format(nt.price)))
 
-                gbl_this_transaction.update_price()     # Update the transaction prices
-                subtotal_textbox.config(text="Sub Total     $ {:.2f}".format(gbl_this_transaction.pre_tax))
-                tax_textbox.config(text="Tax     {:.0f} %".format(float((gbl_this_transaction.tax-1)*100)))
-                total_textbox.config(text="Total     $ {:.2f}".format(gbl_this_transaction.final_cost))
+                self.t.update_price()     # gbl_this_transaction.update_price()   Update the transaction prices
+                subtotal_textbox.config(text="Sub Total     $ {:.2f}".format(self.t.pre_tax)) #gbl_this_transaction
+                tax_textbox.config(text="Tax     {:.0f} %".format(float((self.t.tax-1)*100)))   #gbl_this_transaction
+                total_textbox.config(text="Total     $ {:.2f}".format(self.t.final_cost))#gbl_this_transaction
 
-def showPopUp_ItemNotSelected(message):
-    popup=tk.Tk()
-    popup.wm_title("Item Selection")
-    label=ttk.Label(popup, text=message,font='Times')
-    label.pack(side='top',fill='x',pady=20)
-    ack_button=ttk.Button(popup,text='Continue',command=popup.destroy())
-    ack_button.pack()
+            ##################################################################################################
+            ## showPopUp_ItemNotSelected(msg): pass in a message to display to the user                     ##
+            ##              This was initially made to let the user know they had not selected an item      ##
+            ##              from the list to remove                                                         ##
+            ##################################################################################################
+            def showPopUp_ItemNotSelected(msg):
+                tkinter.messagebox.showinfo(title="Info",
+                                            message=msg)
+
+            ##################################################################################################
+            ## delete_selected(): delete the item selected by the user                                      ##
+            ##              Called by 'remove_item_button'                                                  ##
+            ##                                                                                              ##
+            ##################################################################################################
+            def delete_selected():  # Delete the item selected
+                try:
+                    x = transaction_view.selection()[0]  # Get the selected item
+                    transaction_view.delete(x)  # Delete the selected item
+                    i = int(Bakery.transaction_item_id[1])  # Covert the string to int
+                    self.t.remove_item(i)  # gbl_this_transaction.remove_item(i) Delete the item from the transaction line item
+                    self.t.update_price() #gbl_this_transaction.update_price()
+                    subtotal_textbox.config(text="Sub Total     $ {:.2f}".format(self.t.pre_tax))#gbl_this_transaction
+                    tax_textbox.config(text="Tax     {:.0f} %".format(float(((self.t.tax - 1) * 100))))#gbl_this_transaction
+                    total_textbox.config(text="Total     $ {:.2f}".format(self.t.final_cost))#gbl_this_transaction
+                except:
+                    showPopUp_ItemNotSelected("An Item Was Not Selected.\nPlease Make A Selection And Try Again")
+
+            # Start the checkout process
+            def checkOut_window(x, y, t):
+
+                def finalizeCashOut():
+                    try:
+                        cashAmount = float(enteredValue.get())
+                        change = self.t.finalize_transaction(1, cashAmount)   #gbl_this_transaction.finalize_transaction(1, cashAmount)
+                        checkout_change_value.config(text="$ {:.2f}".format(self.t.change_returned))
+                    except:
+                        showPopUp_ItemNotSelected("Cash Received is 0 or blank.\nPlease Enter A Value And Try Again")
 
 
+                r_width = 850
+                r_height = 350
+                enteredValue = StringVar()
+                checkout_popup_win = Toplevel(bg='gray',
+                                              borderwidth=0)
+                checkout_popup_win.title("Check Out: ")
+                screen_width = x
+                screen_height = y
+                window_center_x = int(screen_width / 2 - r_width / 2)
+                window_center_y = int(screen_height / 2 - r_height / 2)
+                checkout_popup_win.geometry(f'{r_width}x{r_height}+{window_center_x}+{window_center_y}')
+                checkout_canvas = Canvas(checkout_popup_win,
+                                         bg='white',
+                                         borderwidth=0)
+                checkout_canvas.pack()
+                checkout_frame1 = Frame(checkout_canvas,
+                                        bg='white',
+                                        borderwidth=0)
+                checkout_frame1.grid(row=0,
+                                     column=0,
+                                     padx=10,
+                                     pady=10)
+                checkout_header_label = Label(checkout_frame1,
+                                              borderwidth=2,
+                                              text="Please Check The Cart To Make Sure All Items Are Accounted For",
+                                              font=('Times', 24),
+                                              background='white',
+                                              pady=20)
+                checkout_header_label.pack(anchor=CENTER)
+                checkout_frame2 = Frame(checkout_canvas,
+                                        borderwidth=0,
+                                        bg='white')
+                checkout_frame2.grid(row=1,
+                                     column=0,
+                                     pady=10,
+                                     padx=10)
+                checkout_total_label = Label(checkout_frame2,
+                                             text='Total Balance: ',
+                                             background='white',
+                                             borderwidth=0,
+                                             font=('Times', 24),
+                                             pady=10)
+                checkout_total_label.grid(row=0,
+                                          column=0,
+                                          sticky='e')
+                checkout_total_amount = Label(checkout_frame2,
+                                              borderwidth=0,
+                                              font=('Times', 24),
+                                              text="$ {:.2f}".format(t.final_cost),
+                                              background='white')
+                checkout_total_amount.grid(row=0,
+                                           column=1,
+                                           sticky='e')
+
+                checkout_label = Label(checkout_frame2,
+                                       text='Cash Entered: ',
+                                       background='white',
+                                       borderwidth=0,
+                                       font=('Times', 24),
+                                       pady=10)
+                checkout_label.grid(row=1,
+                                    column=0,
+                                    sticky='e')
+                checkout_amount_entered = Entry(checkout_frame2,
+                                                textvariable=enteredValue,
+                                                borderwidth=2,
+                                                selectborderwidth=0,
+                                                font=('Times', 24),
+                                                justify=RIGHT)
+                checkout_amount_entered.grid(row=1,
+                                             column=1,
+                                             sticky='e')
+
+                checkout_change = Label(checkout_frame2,
+                                        text="Change to give:",
+                                        borderwidth=0,
+                                        background='white',
+                                        font=('Times', 24))
+                checkout_change.grid(row=2,
+                                     column=0,
+                                     sticky='e')
+
+                checkout_change_value = Label(checkout_frame2,
+                                              text=self.t.change_returned,
+                                              background='white',
+                                              borderwidth=0,
+                                              font=('Times', 24))
+                checkout_change_value.grid(row=2,
+                                           column=1,
+                                           sticky='e')
+
+                checkout_frame3 = Frame(checkout_canvas,
+                                        bg='white')
+                checkout_frame3.grid(row=2,
+                                     column=0,
+                                     pady=10,
+                                     padx=10)
+                checkout_finalize = Button(checkout_frame3,             #Checkout button
+                                           text="Complete",
+                                           font=('Times', 24),
+                                           height=2,
+                                           width=20,
+                                           command=lambda: finalizeCashOut())
+                checkout_finalize.grid(row=0,column=0,padx=10,pady=10)
+
+                checkout_clear_list = Button(checkout_frame3,             #Finalize clear item list
+                                             text="Finish Transaction",
+                                             font=('Times', 24),
+                                             height=2,
+                                             width=20,
+                                             command=lambda: doNothing())
+                checkout_clear_list.grid(row=0,column=1,padx=10,pady=10)
+
+
+# Show the charts window
 def showCharts(e):
     e.destroy()
     newRoot=Tk()
     application=Charts.Graph(newRoot)
     newRoot.mainloop()
 
+
+# Show the login window to get to the database view
 def showLoginWindow(e):
     e.destroy()
     newRoot=Tk()
     application=LoginWindow.Login(newRoot)
     newRoot.mainloop()
 
+
+# Do nothing
 def doNothing():
     pass
 
-def checkOut_window():
-    checkout_Window=tk.Tk()
-    cash_received=simpledialog.askstirng("Enter cash amount: ",parent=checkout_Window)
-    return cash_received
+
+def setup_Checkout(x,y):
+    x=x
+    y=y
+    purchase_total=gbl_this_transaction
+    checkOut_window(x,y,purchase_total)
+
+
 
 def bakery_frame(container):
     frame = ttk.Frame(container)
@@ -465,3 +631,7 @@ def bakery_frame(container):
     root.mainloop()
 
 
+###############
+# Notes:    1.  Left off working on the checkout window. The transaction is not being passed to calculated the change, etc...
+#           2.  Also noticed that the price in the transaction view will increment 2x so a $0.50 item will end up showing
+#               the price at $1.00

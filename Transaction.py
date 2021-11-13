@@ -21,7 +21,7 @@ class LineItem:
     def increment_quantity(self, itemID, amount):
         if self.itemID == itemID and amount <= self.quantity:
             self.quantity += amount
-            self.price += getProductCostFromID(itemID) * amount
+            self.price = getProductCostFromID(itemID) * self.quantity
             return self
         else:
             return -1
@@ -110,8 +110,7 @@ class Transaction:
         self.update_price()
         self.cash_method = cash_status
         self.cash_received = cash_amount
-        self.change_returned = self.final_cost - self.cash_received
+        self.change_returned = self.cash_received - self.final_cost
         self.transaction_status = 1
         # insert into DB
         self.print_receipt()
-
