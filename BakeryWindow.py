@@ -620,7 +620,7 @@ def showDatabaseWindow(e):
 def showLoginWindow(e):
     e.destroy()
     newRoot=Tk()
-    application=LoginWindow.Login(newRoot)
+    application=LoginWindow.LoginDatabase(newRoot)
     newRoot.mainloop()
 
 
