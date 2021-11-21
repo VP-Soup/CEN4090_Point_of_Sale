@@ -22,7 +22,7 @@ class DatabaseWindow:
     global count
     count=0
 
-    def doNothing():
+    def doNothing(self):
         pass
 
     def showBakeryWindow(e):

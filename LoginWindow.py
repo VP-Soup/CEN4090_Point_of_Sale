@@ -16,7 +16,7 @@ class Login:
         self.root.title('LOGIN SCREEN')
         self.root.configure(background='white')
         root_width = 600
-        root_height = 582
+        root_height = 700
 
 
         # GET THE DISPLAY WINDOW DIMENSIONS
@@ -74,10 +74,6 @@ class Login:
 
     def login_user(self):
 
-        # We are getting admin 123
-        # -1 - returned from the DAL for "admin" and "123" - should return 1
-        # we need to fix this error
-
         if validateLoginCredentials(self.username.get(),self.password.get()) == 1:
 
             #Do the work done by the main of DBMSproject.py
@@ -96,7 +92,7 @@ class Login:
             self.message = Label(self.msg_frame,text = 'Username or Password incorrect. Try again!',fg = 'Red', bg = 'white')
             self.message.pack()
 
-
+# class being called by the DB login
 class LoginDatabase:
 
     def __init__(self, root):
@@ -105,7 +101,7 @@ class LoginDatabase:
         self.root.title('LOGIN SCREEN')
         self.root.configure(background='white')
         root_width = 600
-        root_height = 582
+        root_height = 700
 
         # GET THE DISPLAY WINDOW DIMENSIONS
         screen_width = root.winfo_screenwidth()
@@ -160,15 +156,10 @@ class LoginDatabase:
         # IF ENTER IS PRESSED SPECIFICALLY AFTER ENTERING THE PASSWORD ACK LIKE PRESSING THE LOGIN BUTTON
         root.bind('<Return>', callback)
 
+    # verify if its admin and correct credentials to grant access
     def login_user(self):
 
-        # We are getting admin 123
-        # -1 - returned from the DAL for "admin" and "123" - should return 1
-        # we need to fix this error
-
-        if validateLoginCredentials(self.username.get(), self.password.get()) == 1:
-
-            # Do the work done by the main of DBMSproject.py
+        if validateLoginCredentials(self.username.get(), self.password.get()) == 1 and (self.username.get() == "admin"):
 
             # Destroy the current window
             self.root.destroy()
@@ -177,10 +168,19 @@ class LoginDatabase:
             newroot = Tk()
             application = DatabaseWindow(newroot)
             newroot.mainloop()
-        else:
+        elif validateLoginCredentials(self.username.get(), self.password.get()) != 1 and (self.username.get() == "admin"):
             '''Prompt user that either id or password is wrong'''
             self.msg_frame = Frame(self.root)
             self.msg_frame.pack(anchor=CENTER)
             self.message = Label(self.msg_frame, text='Username or Password incorrect. Try again!', fg='Red',
+                                 bg='white')
+            self.message.pack()
+
+        else:
+
+            '''Prompt user that either id or password is wrong'''
+            self.msg_frame = Frame(self.root)
+            self.msg_frame.pack(anchor=CENTER)
+            self.message = Label(self.msg_frame, text='Your are not authorized to view this page!', fg='Red',
                                  bg='white')
             self.message.pack()
