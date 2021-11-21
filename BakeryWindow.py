@@ -62,7 +62,7 @@ class Bakery:
         window_center_x = int(screen_width / 2 - root_width / 2)
         window_center_y = int(screen_height / 2 - root_height / 2)
 
-        #SET THE ROOT WINDOW LOCATION ON THE DISPLAY
+        # SET THE ROOT WINDOW LOCATION ON THE DISPLAY
         self.root.geometry(f'{root_width}x{root_height}+{window_center_x}+{window_center_y}')
 
         #CREATE A MENU BAR
