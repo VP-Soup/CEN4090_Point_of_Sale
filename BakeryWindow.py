@@ -79,7 +79,7 @@ class Bakery:
 
         #ADMINISTRATOR MENU OPTIONS
         admin_menu = Menu(app_menu, tearoff=0)
-        admin_menu.add_command(label="Login", command=lambda: showLoginWindow(self.root))
+        admin_menu.add_command(label="Login", command=lambda: getLoginWindow())
         admin_menu.add_command(label="Logout", command=doNothing())
         admin_menu.add_separator()
         admin_menu.add_command(label="Database", command=lambda: showDatabaseWindow(self.root))
@@ -623,6 +623,11 @@ def showLoginWindow(e):
     application=LoginWindow.LoginDatabase(newRoot)
     newRoot.mainloop()
 
+# shows the login windown without destroying the lower level window
+def getLoginWindow():
+    newRoot = tkinter.Toplevel()
+    application = LoginWindow.LoginDatabase(newRoot)
+    newRoot.mainloop()
 
 # Do nothing
 def doNothing():
