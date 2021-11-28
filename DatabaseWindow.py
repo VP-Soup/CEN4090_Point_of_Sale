@@ -6,14 +6,13 @@
 ##                      edit the records in the database.                                               ##
 ## References: YouTube.com, Codemy.com, Stackoverflow.com, tutorialspoint.com, geeksforgeeks.org,       ##
 ##            pythonguides.com, anzeljg.github.io, & pythontutorial.net                                 ##
-## Date: 06NOV21                                                                                        ##
+## Date: 28NOV21                                                                                        ##
 ##########################################################################################################
+import tkinter
 
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
-import sqlite3
-from operator import itemgetter
 import BakeryButton, DataAccess,BakeryWindow,Charts,About
 
 
@@ -21,47 +20,54 @@ class DatabaseWindow:
     #GLOBAL COUNT VARIABLE FOR THE ROWS ODD/EVEN
     global count
     count=0
+    global db_being_viewed
+    db_being_viewed=""
 
-    def doNothing(self):
+    def doNothing():
         pass
 
-    def showBakeryWindow(e):
+    def showBakeryWindow(e,eid):
         e.destroy()
         newRoot = Tk()
-        application = BakeryWindow.Bakery(newRoot)
+        application = BakeryWindow.Bakery(newRoot,eid)
         newRoot.mainloop()
 
+    # Show the charts window
+    def showCharts(e, eid):
+        e.destroy()
+        newRoot = Tk()
+        application = Charts.Graph(newRoot, eid)
+        newRoot.mainloop()
 
-    def __init__(self, root):
+    def __init__(self, root, eid):
         #SET THE WINDOW DIMENSIONS
-        root_width = 1900
-        root_height = 1000
         button_width=175
         button_height=60
-
         self.root = root
         self.root.title('Database Entry')
-
+        self.eid = eid
+        entries = []    #The values in the entry boxes
+        global db_being_viewed
+        db_being_viewed = "Product"
         #GET THE DISPLAY WINDOW DIMENSIONS
         screen_width=root.winfo_screenwidth()
         screen_height=root.winfo_screenheight()
 
         #FIND THE CENTER OF THE MONITOR WINDOW
-        window_center_x=int(screen_width/2-root_width/2)
-        window_center_y=int(screen_height/2-root_height/2)
+        window_center_x=int(screen_width/2-screen_width/2)
+        window_center_y=int(screen_height/2-screen_height/2)
 
         #SET THE ROOT WINDOW LOCATION ON THE DISPLAY
-        root.geometry(f'{root_width}x{root_height}+{window_center_x}+{window_center_y}')
-        canvas = tk.Canvas(master=self.root, width=root_width, height=root_height, bg='white')
+        root.geometry(f'{screen_width}x{screen_height}+{window_center_x}+{window_center_y}')
+        canvas = tk.Canvas(master=root, width=screen_width, height=screen_height, bg='white')
         canvas.pack()
         canvas['highlightcolor']='white'
 
-        #CREATE A CONNECTION TO THE DATABASE
-        conn=sqlite3.connect('BakeryDatabase.db')
+        # #CREATE A CONNECTION TO THE DATABASE
+        # conn=sqlite3.connect('BakeryDatabase.db')
 
         #SET THE STYLE OF THE DATABASE ENTRY
         db_style=ttk.Style()
-        #db_style.theme_use('default')
         db_style.configure('db.Treeview',
                            background="#eae1df",
                            foreground='black',
@@ -75,7 +81,7 @@ class DatabaseWindow:
 
         db_style.map('db.Treeview',
                      background=[('selected','#347083')])
-        db_frame=ttk.Frame(canvas,height = root_height/2,width=root_width)
+        db_frame=ttk.Frame(canvas,height = screen_height/2,width=screen_width)
         db_frame['padding']=5
         db_frame['borderwidth']=0
         db_frame['relief']='sunken'
@@ -102,48 +108,42 @@ class DatabaseWindow:
 
         #CREATE COLUMN HEADERS FOR THE DATABASE AND FORMAT
 
-        db_view['columns']=("ID","NAME","QUANTITY","PRICE","COST","CATEGORY")
+        db_view['columns']=("ID","Name","Quantity","Selling Price","Cost","Category")
+
         db_view.column("#0",
                        width=0,
                        stretch=NO)
         db_view.column("ID",
                        anchor=W,
-                       #width=150,
                        stretch=YES)
-        db_view.column("NAME",
+        db_view.column("Name",
                        anchor=W,
-                       #width=150,
                        stretch=YES)
-        db_view.column("QUANTITY",
+        db_view.column("Quantity",
                        anchor=W,
-                       #width=150,
                        stretch=YES)
-        db_view.column("PRICE",
+        db_view.column("Selling Price",
                        anchor=W,
-                       #width=150,
                        stretch=YES)
-        db_view.column("COST",
+        db_view.column("Cost",
                        anchor=W,
-                       #width=150,
                        stretch=YES)
-        db_view.column("CATEGORY",
+        db_view.column("Category",
                        anchor=W,
-                       #width=150,
                        stretch=YES)
 
         #DATABASE VIEW COLUMN HEADINGS
         db_view.heading("#0",text="")
         db_view.heading("ID", text="ID", anchor=W)
-        db_view.heading("NAME", text="NAME", anchor=W)
-        db_view.heading("QUANTITY", text="QUANTITY", anchor=W)
-        db_view.heading("PRICE", text="PRICE", anchor=W)
-        db_view.heading("COST", text="COST", anchor=W)
-        db_view.heading("CATEGORY", text="CATEGORY", anchor=W)
+        db_view.heading("Name", text="Name", anchor=W)
+        db_view.heading("Quantity", text="Quantity", anchor=W)
+        db_view.heading("Selling Price", text="Selling Price", anchor=W)
+        db_view.heading("Cost", text="Cost", anchor=W)
+        db_view.heading("Category", text="Category", anchor=W)
 
         #SET ALTERNATING COLORS FOR THE DATABASE ENTRIES
         db_view.tag_configure('oddentry',background='#eae1df')
         db_view.tag_configure('evenentry',background='#f1b0a2')
-
 
         #SQL QUERY TO RETURN ALL THE PRODUCTS FROM THE DATABASE ADD ASSIGN COLORS TO THE ROWS
         db_entry=DataAccess.listAllProduct()
@@ -168,45 +168,51 @@ class DatabaseWindow:
         db_entry_frame.pack(fill="x",expand=Y,padx=20,pady=20)
 
         #ADD PRODUCT ID LABEL TO THE GRID
-        product_ID_label = Label(db_entry_frame,text="PRODUCT ID",justify="right")
+        product_ID_label = Label(db_entry_frame,text="Product ID",justify="right")
         product_ID_label.grid(row=0, column=0, padx=20, pady=10)
 
         #ADD PRODUCT ID ENTRY TO THE GRID
         product_ID_entry=Entry(db_entry_frame,width=30)
+        entries.append(product_ID_entry)
         product_ID_entry.grid(row=0, column=1, padx=20, pady=10)
 
         #ADD NAME LABEL AND ENTRY BOX TO THE GRID
-        db_name_label=Label(db_entry_frame,text="NAME",justify="right")
+        db_name_label=Label(db_entry_frame,text="Name",justify="right")
         db_name_label.grid(row=0,column=2, padx=20, pady=10)
         db_name_entry=Entry(db_entry_frame,width=30)
+        entries.append(db_name_entry)
         db_name_entry.grid(row=0, column=3, padx=20, pady=10)
 
         #ADD QUANTITY LABEL AND ENTRY BOX TO THE GRID
-        db_quan_label = Label(db_entry_frame, text="QUANTITY",justify="right")
+        db_quan_label = Label(db_entry_frame, text="Quantity",justify="right")
         db_quan_label.grid(row=0, column=4, padx=20, pady=20)
         db_quan_entry = Entry(db_entry_frame, width=30)
+        entries.append(db_quan_entry)
         db_quan_entry.grid(row=0, column=5, padx=20, pady=20)
 
         #ADD PRICE LABEL AND ENTRY BOX TO THE GRID
-        db_sellPrice_label = Label(db_entry_frame, text="SELLING PRICE",justify="right")
+        db_sellPrice_label = Label(db_entry_frame, text="Selling Price $",justify="right")
         db_sellPrice_label.grid(row=1, column=0, padx=20, pady=20)
         db_sellPrice_entry = Entry(db_entry_frame, width=30)
+        entries.append(db_sellPrice_entry)
         db_sellPrice_entry.grid(row=1, column=1, padx=20, pady=20)
 
         #ADD COST LABEL AND ENTRY BOX TO THE GRID
-        db_cost_label = Label(db_entry_frame, text="COST",justify="right")
+        db_cost_label = Label(db_entry_frame, text="Cost $",justify="right")
         db_cost_label.grid(row=1, column=2, padx=20, pady=20)
         db_cost_entry = Entry(db_entry_frame, width=30)
+        entries.append(db_cost_entry)
         db_cost_entry.grid(row=1, column=3, padx=20, pady=20)
 
         #ADD CATEGORY LABEL AND ENTRY BOX TO THE GRID
-        db_category_label = Label(db_entry_frame, text="CATEGORY",justify="right")
+        db_category_label = Label(db_entry_frame, text="Category",justify="right")
         db_category_label.grid(row=1, column=4, padx=20, pady=20)
         db_category_entry = Entry(db_entry_frame, width=30)
+        entries.append(db_category_entry)
         db_category_entry.grid(row=1, column=5, padx=20, pady=20)
 
         for child in db_entry_frame.winfo_children():
-            child.configure(font=('Times',18))
+            child.configure(font=('Times',20))
 
         #CLEAR RECORD ENTRIES FROM THE DATABASE
         def clear_record():
@@ -220,98 +226,101 @@ class DatabaseWindow:
         #SELECT ENTRIES FROM THE DATABASE
         # DELETE WHAT IS IN THE BOXES
         def select_record(x):
-            product_ID_entry.delete(0,END)
-            db_name_entry.delete(0,END)
-            db_sellPrice_entry.delete(0,END)
-            db_quan_entry.delete(0, END)
-            db_cost_entry.delete(0, END)
-            db_category_entry.delete(0, END)
+            for widget in db_entry_frame.winfo_children():
+                if isinstance(widget,tkinter.Entry):
+                    widget.delete(0,END)
 
             # RE-POPULATE THE BOXES WITH THE SELECTED DATA FROM THE TABLE
             selected_record=db_view.focus()
             selected_values=db_view.item(selected_record,'values')
 
             # Enter the selected record into the textboxes
-            product_ID_entry.insert(0, selected_values[0])
-            db_name_entry.insert(0, selected_values[1])
-            db_sellPrice_entry.insert(0, selected_values[2])
-            db_quan_entry.insert(0, selected_values[3])
-            db_cost_entry.insert(0, selected_values[4])
-            db_category_entry.insert(0, selected_values[5])
+            v = len(selected_values)
+            index=0
+            for widget in db_entry_frame.winfo_children():
+                if isinstance(widget,tkinter.Entry):
+                    widget.insert(0,selected_values[index])
+                    index+=1
 
         db_view.bind("<ButtonRelease-1>", select_record)    # Bind a button event to a record selection
 
-
-        #CREATE A NEW FRAME TO ADD THE RECORD ENTRY AND DELETE BUTTONS
-        db_button_frame = LabelFrame(canvas, text="Database Records Controls")
-        db_button_frame.pack(fill="x", expand="yes", padx=10, pady=10)
-
-        update_button=BakeryButton.BakeryButton(db_button_frame,
-                                                height=button_height,
-                                                width=button_width,
-                                                text="UPDATE RECORD")
-        update_button.grid(row=0,column=0,padx=10,pady=10, ipadx=10, ipady=10)
-
-        add_records_button = BakeryButton.BakeryButton(db_button_frame,
-                                                       height=button_height,
-                                                       width=button_width,
-                                                       text="NEW RECORD")
-        add_records_button.grid(row=0, column=1, padx=10, pady=10, ipadx=10, ipady=10)
-
-        remove_record_button = BakeryButton.BakeryButton(db_button_frame,
-                                                         height=button_height,
-                                                         width=button_width,
-                                                         text="REMOVE RECORD")
-        remove_record_button.grid(row=0, column=2, padx=10, pady=10, ipadx=10, ipady=10)
-
-        remove_all_button = BakeryButton.BakeryButton(db_button_frame,
+        def set_button_commands():
+            update_button = BakeryButton.BakeryButton(dbbutton_frame,
                                                       height=button_height,
                                                       width=button_width,
-                                                      text="REMOVE ALL RECORDS")
-        remove_all_button.grid(row=0, column=3, padx=10, pady=10, ipadx=10, ipady=10)
+                                                      text="UPDATE RECORD",
+                                                      command=lambda query='update',t=db_being_viewed: db_button_pressed_event(query,t,entries))
+            update_button.grid(row=0, column=0, padx=10, pady=10, ipadx=10, ipady=10)
 
-        move_up_button = BakeryButton.BakeryButton(db_button_frame,
-                                                   height=button_height,
-                                                   width=button_width,
-                                                   text="MOVE RECORD UP")
-        move_up_button.grid(row=0, column=4, padx=10, pady=10, ipadx=10, ipady=10)
+            add_records_button = BakeryButton.BakeryButton(dbbutton_frame,
+                                                           height=button_height,
+                                                           width=button_width,
+                                                           text="INSERT NEW RECORD",
+                                                           command=lambda query='insert', t=db_being_viewed: db_button_pressed_event(query, t, entries))
+            add_records_button.grid(row=0, column=1, padx=10, pady=10, ipadx=10, ipady=10)
 
-        move_down_button=BakeryButton.BakeryButton(db_button_frame,
-                                                   height=button_height,
-                                                   width=button_width,
-                                                   text="MOVE RECORD DOWN")
-        move_down_button.grid(row=0,column=5,padx=10,pady=10, ipadx=10, ipady=10)
+            remove_record_button = BakeryButton.BakeryButton(dbbutton_frame,
+                                                             height=button_height,
+                                                             width=button_width,
+                                                             text="DELETE RECORD",
+                                                             command=lambda query='delete',t=db_being_viewed: db_button_pressed_event(query, t, entries))
+            remove_record_button.grid(row=0, column=2, padx=10, pady=10, ipadx=10, ipady=10)
 
-        select_button = BakeryButton.BakeryButton(db_button_frame,
-                                                  height=button_height,
-                                                  width=button_width,
-                                                  text="CLEAR RECORD",command=clear_record)
-        select_button.grid(row=0, column=6, padx=10, pady=10, ipadx=10, ipady=10)
+            select_button = BakeryButton.BakeryButton(dbbutton_frame,
+                                                      height=button_height,
+                                                      width=button_width,
+                                                      text="CLEAR ENTRY", command=clear_record)
+            select_button.grid(row=0, column=3, padx=10, pady=10, ipadx=10, ipady=10)
 
-        exit_button = BakeryButton.BakeryButton(db_button_frame,
-                                                height=button_height,
-                                                width=button_width,
-                                                text="EXIT",command=lambda: DatabaseWindow.showBakeryWindow(self.root))
-        exit_button.grid(row=1, column=3, padx=10, pady=10, ipadx=10, ipady=10)
+            exit_button = BakeryButton.BakeryButton(dbbutton_frame,
+                                                    height=button_height,
+                                                    width=button_width,
+                                                    text="EXIT", command=lambda: DatabaseWindow.showBakeryWindow(root,self.eid))
+            exit_button.grid(row=0, column=4, padx=10, pady=10, ipadx=10, ipady=10)
+
+        def db_button_pressed_event(q,t,e):     # When a db event button is pressed it will pass the query and the
+            return_string=""                    # entries list
+            query_string= q+t
+            number_of_variables=len(e)
+
+            if hasattr(DataAccess, query_string) and callable(func := getattr(DataAccess, query_string)):  # If the fx exist call it
+                if q == 'delete':
+                    return_string = func(e[0].get())
+                elif number_of_variables==4:
+                    return_string = func(e[0].get(),e[1].get(),e[2].get(),e[3].get())
+                elif number_of_variables==5:
+                    return_string = func(e[0].get(), e[1].get(), e[2].get(), e[3].get(),e[4].get())
+                elif number_of_variables==6:
+                    return_string = func(e[0].get(), e[1].get(), e[2].get(), e[3].get(),e[4].get(),e[5].get())
+                setup_query=getMenuItemCommand(t)
+                setUp(setup_query,t)
+            set_button_commands()
+
+        #CREATE A NEW FRAME TO ADD THE RECORD ENTRY AND DELETE BUTTONS
+        dbbutton_frame = LabelFrame(canvas, text="Database Records Controls")
+        for i in range (5): # For loop to enable equal column widths for the buttons
+            dbbutton_frame.grid_columnconfigure(i,weight=1)
+        dbbutton_frame.pack(fill="x", expand="yes", padx=20, pady=20)
+        set_button_commands()
 
         # CREATE A MENU BAR
-        app_menu = Menu(self.root)
+        app_menu = Menu(root)
 
         # FILE MENU ITEMS
         file_menu = Menu(app_menu, tearoff=0)
-        file_menu.add_command(label="New", )
-        file_menu.add_command(label="Open", )
-        file_menu.add_command(label="Save", )
-        file_menu.add_separator()
+        # file_menu.add_command(label="New", )
+        # file_menu.add_command(label="Open", )
+        # file_menu.add_command(label="Save", )
+        # file_menu.add_separator()
         file_menu.add_command(label="Exit", command=root.destroy)
         app_menu.add_cascade(label="File", menu=file_menu)
 
         # ADMINISTRATOR MENU OPTIONS
         admin_menu = Menu(app_menu, tearoff=0)
-        admin_menu.add_command(label="Login", command=lambda: BakeryWindow.showLoginWindow(self.root))
-        admin_menu.add_command(label="Logout", command=lambda: BakeryWindow.Bakery(self.root))
+        admin_menu.add_command(label="Login", command=lambda: BakeryWindow.showLoginWindow(root))
+        admin_menu.add_command(label="Logout", command=lambda: BakeryWindow.Bakery(root,self.eid))
         admin_menu.add_separator()
-        admin_menu.add_command(label="Charts", command=Charts.Graph)
+        admin_menu.add_command(label="Charts", command=lambda: DatabaseWindow.showCharts(self.root, self.eid))
         app_menu.add_cascade(label="Admin", menu=admin_menu)
 
 
@@ -325,28 +334,35 @@ class DatabaseWindow:
             # sql_query_command = f"{table}"
             # print("table: query:", table, sql_query_command)
             dbase_menu.add_command(label=table,
-                                   command=lambda view=db_view, boundm=table: setUp(view, getMenuItemCommand(boundm), boundm))
+                                   command=lambda view=db_view, boundm=table: setUp(getMenuItemCommand(boundm), boundm))
         app_menu.add_cascade(label="Database", menu=dbase_menu) # ADD MENU ITEMS TO THE WINDOW TITLE BAR
 
 
         def getMenuItemCommand(tag):
-            command=f"view{tag}Table"
+            global db_being_viewed      # Keep track of the database being viewed
+            command=f"view{tag}Table"   # Table to view
+            db_being_viewed = tag       # Update the database being viewed for the buttons variable 't'
+            set_button_commands()       # Update the button command
             return command
         # HELP MENU OPTIONS
         help_menu = Menu(app_menu, tearoff=0)
         help_menu.add_command(label="Help", )
         help_menu.add_command(label="About", command=About.About)
         app_menu.add_cascade(label="Help", menu=help_menu)
-        self.root.config(menu=app_menu)
+        root.config(menu=app_menu)
+
+        #Button click event to refresh the screen
+
 
         # SETUP FUNCTION TO POPULATE THE DATABASE VIEW WITH DIFFERENT MENU SELECTIONS
-        def setUp(view,query,table):
+        def setUp(query,table):
 
-            db_columns_names = []  # TABLE NAMES RETRIEVED FROM A TABLE
+            dbcolumns_names = []  # TABLE NAMES RETRIEVED FROM A TABLE
             count = 0  # ODD AND EVEN ROWS WILL BE DIFFERENT BG COLORS ALSO USED FOR IID
+            entries.clear()
 
-            for i in view.get_children(): # CLEAR THE TREEVIEW OF EXISTING ENTRIES
-                view.delete(i)
+            for i in db_view.get_children(): # CLEAR THE TREEVIEW OF EXISTING ENTRIES
+                db_view.delete(i)
 
             # CHECK IF THE QUERY EXIST IN THE DataAccess LAYER AND THEN REQUEST
             # THE *'VARIABLE', REPRESENTS A TUPLE TO RECEIVE DATA - GOOD TO REMEMBER
@@ -356,67 +372,67 @@ class DatabaseWindow:
                 *cur,=func()
             n = len(cur[0].description)     # THE CURSER.DESCRIPTION HAS THE COLUMN NAMES IN IT
             if n>0:
-                db_entry_frame.winfo_children()
-                for widget in db_entry_frame.winfo_children():
-                    widget.destroy()
+                db_entry_frame.winfo_children()                 # Get widgets in the db entry frame
+                for widget in db_entry_frame.winfo_children():  # Delete the widgets in the frame to create new widgets
+                    widget.destroy()                            # connected to the database that will be viewed
                 l=Label()
-                e=Entry()
-                label_index=0
+                e=Entry()                                       # Keep track of the entry boxes to pass to the...
+                label_index=0                                   # ...def db_button_pressed_event(q,t,e)
                 entry_index=0
                 column_number=0
                 row_number=0
                 for index in range(0, n):           # GET THE TABLE NAMES OUT FOR THE HEADERS
-                    db_columns_names.append(cur[0].description[index][0])
+                    dbcolumns_names.append(cur[0].description[index][0])
                     l[label_index] = Label(db_entry_frame,
                                                text=cur[0].description[label_index][0],
                                                justify="right").grid(row=row_number,
                                                                      column=column_number,
-                                                                     padx=20, pady=10)
+                                                                     padx=20, pady=20)
                     label_index+=1
                     column_number+=1
-                    e[entry_index] = Entry(db_entry_frame,
-                                               width=30).grid(row=row_number,
-                                                              column=column_number,
-                                                              padx=20,
-                                                              pady=10)
+                    e = Entry(db_entry_frame,width=30)  #Create new entry boxes for the number of
+                    e.grid(row=row_number,              #Colums in the new table
+                           column=column_number,
+                           padx=20,
+                           pady=20)
+                    entries.append(e)                   #Add the entry text to a list for use in button
                     entry_index+=1
                     column_number+=1
                     if column_number==6:
                         column_number=0
                         row_number+=1
                 for child in db_entry_frame.winfo_children():
-                    child.configure(font=('Times', 18))
-            view['columns'] = db_columns_names  # DEFINE THE COLUMN NAMES AND HEADERS
+                    child.configure(font=('Times', 20))
+            db_view['columns'] = dbcolumns_names  # DEFINE THE COLUMN NAMES AND HEADERS
 
-            for c in db_columns_names:          # LOOP THROUGH THE NAMES AND ADD THE HEADERS TO THE VIEW
-                view.column(c,anchor=W,stretch=YES)
+            for c in dbcolumns_names:          # LOOP THROUGH THE NAMES AND ADD THE HEADERS TO THE VIEW
+                db_view.column(c, anchor=W, stretch=YES)
 
             # DATABASE VIEW COLUMN HEADINGS
-            for c in db_columns_names:          # SET THE HEADINGS
-                view.heading(c, text=c, anchor=W)
+            for c in dbcolumns_names:          # SET THE HEADINGS
+                db_view.heading(c, text=c, anchor=W)
 
                 # SET ALTERNATING COLORS FOR THE DATABASE ENTRIES
-                view.tag_configure('oddentry', background='#eae1df')
-                view.tag_configure('evenentry', background='#f1b0a2')
+                db_view.tag_configure('oddentry', background='#eae1df')
+                db_view.tag_configure('evenentry', background='#f1b0a2')
 
             # MAKE UP THE QUERY NAME TO CALL
             # CHECK IF THE QUERY EXIST IN THE DataAccess LAYER AND THEN REQUEST
-            # THE DATA AND PUT IT IN DB_ENTRY
-            db_entry=()
+            # THE DATA AND PUT IT IN dbENTRY
+            dbentry=()
             list_all_query=f"listAll{table}"
             if hasattr(DataAccess, list_all_query) and callable(func := getattr(DataAccess, list_all_query)):
-                db_entry = func()               # DATA FROM THE TABLE
+                dbentry = func()                # DATA FROM THE TABLE
 
-            entry_length=len(db_entry)          # LENGTH OF DATA TUPLES TO LOOP THROUGHT
+            entry_length=len(dbentry)           # LENGTH OF DATA TUPLES TO LOOP THROUGH
             for index in range(entry_length):   # LOOP THROUGH THE DATA AND ENTER IT INTO THE DATABASE VIEW
-                if (count%2==0):                # SET THIS ROW WITH A BACKGROUND COLOR DIFFERENT THAN THE NEXT
-                    view.insert("", 'end', iid=count, text='', values=db_entry[index], tags=('evenentry',))
-                elif (count%2==1):
-                    view.insert("",'end', iid=count, text='', values=db_entry[index], tags=('oddentry',))
-                count+= 1
-                index+=1
+                if count % 2 == 0:                # SET THIS ROW WITH A BACKGROUND COLOR DIFFERENT THAN THE NEXT
+                    db_view.insert("", 'end', iid=count, text='', values=dbentry[index], tags=('evenentry',))
+                elif count % 2 == 1:
+                    db_view.insert("",'end', iid=count, text='', values=dbentry[index], tags=('oddentry',))
+                count += 1
+                index += 1
 
-            view.bind("<ButtonRelease-1>", select_record)  # Bind a button event to a record selection
+            db_view.bind("<ButtonRelease-1>", select_record)  # Bind a button event to a record selection
 
         root.mainloop()
-

@@ -1,7 +1,7 @@
 # defines LineItem and Transaction classes
 
 from DataAccess import *
-
+from datetime import date
 
 # class represents one line of receipt
 class LineItem:
@@ -118,6 +118,14 @@ class Transaction:
         self.cash_received = cash_amount
         self.change_returned = self.cash_received - self.final_cost
         self.transaction_status = 1
-        # insert into DB
+        if self.cash_method:
+            pt = "cash"
+        else:
+            pt = "credit"
+        tid = insertTransactions(employeeID=self.eid, totalCost="{:.2f}".format(self.final_cost), date=date.today(),
+                                 paymentType=pt,
+                                 transactionID=None)
+        for l in self.lines:
+            insertTran_Item(tid, l.itemID, l.quantity, l.price)
         self.print_receipt()
 

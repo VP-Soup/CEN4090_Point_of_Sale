@@ -56,7 +56,15 @@ def validateLoginCredentials(user, password):
     password_bytes = bytes(password, encoding='utf-8')
     key_bytes = bytes(key, encoding='utf-8')
 
-    return 1 if bcrypt.checkpw(password_bytes, key_bytes) else 0
+    if bcrypt.checkpw(password_bytes, key_bytes):
+        return getEmployeeIDFromLogin(user, key)[0]
+    else:
+        return 0
+
+# Returns array containing an Employee's attributes from login credentials
+def getEmployeeIDFromLogin(user, pas):
+    cur.execute('''SELECT * FROM Employee WHERE Username =? AND Password=?''', (user, pas,))
+    return cur.fetchone()
 
 
 # Returns array containing an Employee's attributes from login credentials
@@ -166,7 +174,7 @@ def getProductCategory():
 
 
 # Inserts a new Product record into the Product table
-def insertProduct(name = "", quantity= 0, sellP=0, cost=0, category=""):
+def insertProduct(prodID, name = "", quantity= 0, sellP=0, cost=0, category=""):
     cur.execute('''INSERT INTO Product (Name, Quantity, SellingPrice, Cost, Category) VALUES (?, ?, ?, ?, ?)''',
                        (name, quantity, sellP, cost, category))
     conn.commit()
@@ -249,7 +257,7 @@ def getTransactionPaymentTypeFromID(tranID):
 
 
 # Insert transaction into table and return transaction ID 
-def upsertTransaction(employeeID="", totalCost=0.0, date="0000-00-00", paymentType="", transactionID=None):
+def insertTransactions(employeeID="", totalCost=0.0, date="0000-00-00", paymentType="", transactionID=None):
     val = '''NULL''' if transactionID is None else '''?'''
 
     sql = '''INSERT INTO Transactions (TransactionID, EmployeeID, TotalCost, Date, PaymentType) VALUES (
@@ -269,7 +277,7 @@ def upsertTransaction(employeeID="", totalCost=0.0, date="0000-00-00", paymentTy
 
 
 # Update Transaction with ID 
-def updateTransaction(tranID, empID=-111, totalCost=-111, date='', paymentType=''):
+def updateTransactions(tranID, empID=-111, totalCost=-111, date='', paymentType=''):
     if empID !=-111: 
         cur.execute('''UPDATE Transactions SET EmployeeID = ? WHERE TransactionID = ?''', (empID, tranID, ))
     if totalCost !=-111: 
@@ -283,7 +291,7 @@ def updateTransaction(tranID, empID=-111, totalCost=-111, date='', paymentType='
 
 
 # Remove transaction from table using ID 
-def deleteTransaction(tranID):
+def deleteTransactions(tranID):
     sql = "DELETE FROM Transactions WHERE TransactionID = ?"
     cur.execute(sql, (tranID,))
     conn.commit()

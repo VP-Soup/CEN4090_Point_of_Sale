@@ -14,14 +14,12 @@ import tkinter
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
-from tkinter import simpledialog,messagebox
-from operator import itemgetter
-import DataAccess, LoginWindow, About,Charts,BakeryButton, DatabaseWindow
+from tkinter import messagebox
+import DataAccess, LoginWindow, About,Charts,BakeryButton, DatabaseWindow, Transaction
 
 
 # CONSTANT VARIABLES USED THROUGHOUT THE CODE
 # FRAME RELATIVE HEIGHT, RELATIVE WIDTH AND A COMMON COLOR
-import Transaction
 
 frame_rel_height = 0.9
 frame_rel_width = 0.5
@@ -31,12 +29,12 @@ category_bg_color=["#eba994","#e39888","#94a9eb","#94ebb8","#e7eb94"]
 use_font='Times'
 
 
-class Bakery:
+class Bakery():
     #DEFINE GLOBAL SETTING FOR ROOT WINDOW WIDTH AND HEIGHT
-    global root_width
-    root_width = 1900
-    global root_height
-    root_height = 1000
+    # global root_width
+    # root_width = 1200
+    # global root_height
+    # root_height = 1200
     global transaction_view_selected_item
     global transaction_item_id
     global gbl_transaction_in_progress
@@ -48,42 +46,42 @@ class Bakery:
     ## Some initial settings to put the window in the middle of the monitor display                 ##
     ## Add the menu item bar                                                                        ##
     ##################################################################################################
-    def __init__(self, root):
+    def __init__(self, root,eid):
         self.root = root
-        self.root.title('Bakery')
+        self.root.title('Cakes Bakery')
         self.root.iconbitmap('CakesBakery.png')
-        self.t=Transaction.Transaction(1)
+        self.eid = eid
+        self.t=Transaction.Transaction(self.eid)
 
         # GET THE DISPLAY WINDOW DIMENSIONS
         screen_width = root.winfo_screenwidth()
         screen_height = root.winfo_screenheight()
-
         # FIND THE CENTER OF THE MONITOR WINDOW
-        window_center_x = int(screen_width / 2 - root_width / 2)
-        window_center_y = int(screen_height / 2 - root_height / 2)
+        window_center_x = int(screen_width / 2 - screen_width/2)
+        window_center_y = int(screen_height / 2 - screen_height/2)
 
-        # SET THE ROOT WINDOW LOCATION ON THE DISPLAY
-        self.root.geometry(f'{root_width}x{root_height}+{window_center_x}+{window_center_y}')
+        #SET THE ROOT WINDOW LOCATION ON THE DISPLAY
+        self.root.geometry(f'{screen_width}x{screen_height}+{window_center_x}+{window_center_y}')
 
         #CREATE A MENU BAR
         app_menu=Menu(self.root)
 
         #FILE MENU ITEMS
         file_menu = Menu(app_menu, tearoff=0)
-        file_menu.add_command(label="New",)
-        file_menu.add_command(label="Open", )
-        file_menu.add_command(label="Save", )
-        file_menu.add_separator()
+        # file_menu.add_command(label="New",)
+        # file_menu.add_command(label="Open", )
+        # file_menu.add_command(label="Save", )
+        # file_menu.add_separator()
         file_menu.add_command(label="Exit", command=root.destroy)
         app_menu.add_cascade(label="File",menu=file_menu)
 
         #ADMINISTRATOR MENU OPTIONS
         admin_menu = Menu(app_menu, tearoff=0)
-        admin_menu.add_command(label="Login", command=lambda: getLoginWindow())
+        admin_menu.add_command(label="Login", command=lambda: showLoginWindow(self.root))
         admin_menu.add_command(label="Logout", command=doNothing())
         admin_menu.add_separator()
-        admin_menu.add_command(label="Database", command=lambda: showDatabaseWindow(self.root))
-        admin_menu.add_command(label="Charts",command=lambda: showCharts(self.root))
+        admin_menu.add_command(label="Database", command=lambda: showDatabaseWindow(self.root,self.eid))
+        admin_menu.add_command(label="Charts",command=lambda: showCharts(self.root, self.eid))
         app_menu.add_cascade(label="Admin", menu=admin_menu)
 
         #HELP MENU OPTIONS
@@ -105,19 +103,18 @@ class Bakery:
         Bakery.transaction_item_id=()
         bf = ttk.Style()
         bf.configure('new.TFrame', background='white', borderwidth=0, relief='flat')
-        button_frame = ttk.Frame(self.root, style='new.TFrame')
-        button_frame_label = LabelFrame(button_frame, text="PRODUCT SELECTION", font=(use_font, 24))
+        button_frame = ttk.Frame(self.root)
         button_frame.place(relwidth=frame_rel_width, relheight=frame_rel_height, relx=0.0, rely=0.1)
 
         #CREATE A CANVAS TO INSTALL OTHER WIDGETS OF THE APPLICATION INTO
-        button_canvas = tk.Canvas(button_frame)
+        button_canvas = tk.Canvas(button_frame,borderwidth=0,bg =frame_color)
         button_canvas.pack(side=LEFT, fill=BOTH, expand=1)
 
         #SCROLLBAR FOR THE BUTTON FRAME AND CONFIGURATION SETTINGS FOR THE BUTTON FRAME
         scrollbar = ttk.Scrollbar(button_frame, orient="vertical", command=button_canvas.yview)
         sbf = ttk.Style()
         sbf.configure('sbf.TFrame', background=frame_color, font=(use_font, 20), borderwidth=5,
-                      relief='raised')
+                      relief='flat')
         scrollable_button_frame = ttk.Frame(button_canvas, style='sbf.TFrame')
         scrollable_button_frame.columnconfigure(0, weight=1)
         scrollable_button_frame.columnconfigure(1, weight=1)
@@ -148,10 +145,9 @@ class Bakery:
     ##################################################################################################
     #CREATE THE MAIN PORTION OF THE WINDOW,,,ADD THE BUTTONS FOR CHECKOUT SELECTION, ADD THE TOTAL WINDOW AND TOTAL LABEL
     def create_main_window(self):
-        global root_width
-        global root_height
+        root_width=self.root.winfo_screenwidth()
+        root_height= self.root.winfo_screenheight()
         transaction_item_id=()
-
         ##################################################################################################
         ## selected_line_item(x): Determine what line item has focus in the transaction view "treeview" ##
         ##                        Get the transaction view selected item to be used in the function     ##
@@ -178,12 +174,12 @@ class Bakery:
         if hasattr(DataAccess, query) and callable(func := getattr(DataAccess, query)):  # IF THE FUNCTION EXIST CALL IT
             *product_data_categories, = func()
         n = len(product_data_categories)  # THE CATEGORY TYPES HAVE THE COLUMN NAMES IN IT
-        if n > 0:                           # If there are any, loop through and add them
-            index = 0
-            for quick_links in product_data_categories:
-                db_product_categories = list(map(itemgetter(index), product_Data))
-                product_category_names = list(set(db_product_categories))
-                index += 1
+        # if n > 0:                           # If there are any, loop through and add them
+        #     index = 0
+        #     for quick_links in product_data_categories:
+        #         db_product_categories = list(map(itemgetter(index), product_Data))
+        #         product_category_names = list(set(db_product_categories))
+        #         index += 1
 
         # MAIN WINDOW DIMENSIONS
         # ROOT STYLE SETTING FONT TO Times AND SIZE 20
@@ -201,7 +197,7 @@ class Bakery:
         appName_Frame['borderwidth']=1
         appName_Frame['relief']='raised'
         appName_Frame.place(relwidth=1.0, relheight=.1, relx=0, rely=0)
-        appName = ttk.Label(appName_Frame, text="Bakery", font='Times 34 bold', background = frame_color)
+        appName = ttk.Label(appName_Frame, text="Cakes Bakery", font='Times 34 bold', background = frame_color)
         appName.pack(anchor=CENTER)
 
         # THESE BUTTONS ADDED TO THE HEADER WILL ALLOW FOR EITHER SELECTION BY PRODUCT TYPE OR ALPHABETICAL OR
@@ -214,7 +210,7 @@ class Bakery:
         # transaction FRAME: ADD THE transaction FRAME TO THE RIGHT HALF OF THE SCREEN AND USE 90% OF THE SCREEN HEIGHT
         # (HEADER IS THE OTHER 10%)
         rf=ttk.Style()
-        rf.configure('transaction.TFrame',background=frame_color, font=(use_font,20)) # #7AC5CD
+        rf.configure('transaction.TFrame',background=frame_color, font=(use_font,20))
         transaction_frame = ttk.Frame(self.root,style='transaction.TFrame')
         transaction_frame['borderwidth']=2
         transaction_frame['relief']='raised'
@@ -246,8 +242,6 @@ class Bakery:
                                  style='rs.Treeview')
         transaction_scroll.config(command=transaction_view.yview)
 
-
-
         # SET UP THE VIEW HEADINGS AND BIND THE SELECTION
         transaction_view['columns']=("NAME","ITEM ID","QUANTITY","PRICE")
         transaction_view.column("#0",width=0,stretch = NO)
@@ -258,7 +252,7 @@ class Bakery:
         transaction_view.heading("NAME", text="NAME", anchor=W)
         transaction_view.heading("ITEM ID", text="ITEM ID", anchor=W,)
         transaction_view.heading("QUANTITY",text="QUANTITY",anchor=W)
-        transaction_view.heading("PRICE", text="PRICE", anchor=E)
+        transaction_view.heading("PRICE", text="PRICE", anchor=W)
         transaction_view.bind('<ButtonRelease-1>', selected_line_item)
         transaction_view.pack()
         transaction_frame_width = transaction_frame.winfo_screenwidth()
@@ -326,19 +320,19 @@ class Bakery:
         remove_item_button.grid(row=1,column=0,padx=20,pady=20)
 
 
-        lookup_item_button = BakeryButton.BakeryButton(transaction_button_frame,
-                                                       height=tfb_height,
-                                                       width=tfb_width,
-                                                       text="LOOKUP ITEM",
-                                                       style='tfb.TButton')
-        lookup_item_button.grid(row=1, column=1, padx=20, pady=20)
+        # lookup_item_button = BakeryButton.BakeryButton(transaction_button_frame,
+        #                                                height=tfb_height,
+        #                                                width=tfb_width,
+        #                                                text="LOOKUP ITEM",
+        #                                                style='tfb.TButton')
+        # lookup_item_button.grid(row=1, column=1, padx=20, pady=20)
 
         discount_button = BakeryButton.BakeryButton(transaction_button_frame,
                                                     height = tfb_height,
                                                     width=tfb_width,
                                                     text="APPLY\nDISCOUNT",
                                                      style='tfb.TButton')
-        discount_button.grid(row=1,column=2,padx=20,pady=20)
+        discount_button.grid(row=1,column=1,padx=20,pady=20)
 ################
         checkout_button = BakeryButton.BakeryButton(transaction_button_frame,
                                                     height = tfb_height,
@@ -352,31 +346,15 @@ class Bakery:
 
         # CREATE A BUTTON FOR PRODUCT SELECTION
         psb = ttk.Style()
-
-        # COLOR CODE THE CATEGORY TYPES FOR THE PRODUCTS
         for productID, name, quan, price, cost, cat in product_Data:
             global category_bg_color
-            # SAVE THIS FOR LATER. TAKE THE RETURNED CATEGORY VALUES FROM ABOVE AND EITHER ENUM OR
-            # LOOP IN LOOP TO CHECK FOR THE CATEGORY AND SET A COLOR PROFILE TO THE BUTTON BASED
-            # ON THE CATEGORY
-            # if cat == "Bread":
-            #     bg_color=category_bg_color[0]
-            # elif cat=="Puff":
-            #     bg_color=category_bg_color[1]
-            # elif cat=="Filo":
-            #     bg_color=category_bg_color[2]
-            # elif cat=="Cake":
-            #     bg_color=category_bg_color[3]
-            # elif cat=="Cookie":
-            #     bg_color=category_bg_color[4]
-
             # Add an item to the transaction
             psb.configure('b.TButton', font=(use_font, 20), foreground='black')
             selection_button = BakeryButton.BakeryButton(scrollable_Button_Frame, height=100, width=235, text=name,
                                                          style='b.TButton', command=lambda id=productID:addItem(self.t,id))
             Grid.rowconfigure(scrollable_Button_Frame, j, weight=1)
             Grid.columnconfigure(scrollable_Button_Frame, i, weight=1)
-            selection_button.grid(row=j + 1,column=i, sticky="NESW", padx=20,pady=20)
+            selection_button.grid(row=j + 1,column=i, sticky="NESW", padx=10,pady=20)
             if i == 2:
                 i = 0
                 j += 1
@@ -399,16 +377,16 @@ class Bakery:
                     gbl_transaction_in_progress = True
                 for child in transaction_view.get_children():
                     existing_item_ids=transaction_view.item(child)["values"]
-                if len(existing_item_ids)!=0:
-                    line_item_index=0
-                    match_found = False
+                if len(existing_item_ids)!=0:           # are there existing line items displayed, if so index to 0
+                    line_item_index=0                   # and match_found to false to loop through all of the line items
+                    match_found = False                 # to check for a match to increment the quantity
                     for child in transaction_view.get_children():
                         *existing_item_ids,=transaction_view.item(child)["values"]
                         if id==existing_item_ids[1]:
                             # if an item is matched fill the data lineitem
                             # pass lineitem to increment_quantity
                             # insert updated lineitem in the original location
-                            matched_lineitem=Transaction.LineItem(1,id,existing_item_ids[2])
+                            matched_lineitem=Transaction.LineItem(1,id,existing_item_ids[2])    # call Transaction class
                             transaction_view.delete(child)
                             Transaction.LineItem.increment_quantity(matched_lineitem,id,1)
                             transaction_view.insert(parent='', index=line_item_index, text='', values=(matched_lineitem.nameID, matched_lineitem.itemID, matched_lineitem.quantity, "$ {:.2f}".format(matched_lineitem.price)))
@@ -429,7 +407,7 @@ class Bakery:
                     transaction_view.insert(parent='',
                                             index='end',
                                             text='',
-                                            values=(nt.nameID,nt.itemID,nt.quantity,"{:.2f}".format(nt.price)))
+                                            values=(nt.nameID,nt.itemID,nt.quantity,"$ {:.2f}".format(nt.price)))
 
                 self.t.update_price()     # gbl_this_transaction.update_price()   Update the transaction prices
                 subtotal_textbox.config(text="Sub Total     $ {:.2f}".format(self.t.pre_tax)) #gbl_this_transaction
@@ -463,15 +441,21 @@ class Bakery:
                 except:
                     showPopUp_ItemNotSelected("An Item Was Not Selected.\nPlease Make A Selection And Try Again")
 
-            # Start the checkout process
+            ##################################################################################################
+            ##  checkOut_window(x, y, t) open the checkout window                                           ##
+            ##              Verify the amount of cash received is >= to the total cost and return           ##
+            ##              the amount of change to provide                                                 ##
+            ##              The finish button in the window will call clear_Transaction() to clear all      ##
+            ##              the data from the transaction                                                   ##
+            ##################################################################################################
             def checkOut_window(x, y, t):
 
                 def finalizeCashOut():
                     try:
-                        cashAmount = float(enteredValue.get())
+                        cashAmount = float(enteredValue.get())       # cash amount
                         self.t.finalize_transaction(1, cashAmount)   #gbl_this_transaction.finalize_transaction(1, cashAmount)
-                        if self.t.change_returned < 0:
-                            exit()
+                        if self.t.change_returned < 0:               # check the cash amount is >= total cost
+                            exit()                                   # if not exit and throw popup error
                         checkout_change_value.config(text="$ {:.2f}".format(self.t.change_returned))
                     except:
                         showPopUp_ItemNotSelected("There Is A Cash Entered Problem.\nPlease Enter A Value And Try Again")
@@ -488,9 +472,9 @@ class Bakery:
                         total_textbox.config(
                             text="Total     $ {:.2f}".format(self.t.final_cost))  # gbl_this_transaction
 
-                r_width = 850
-                r_height = 350
-                enteredValue = StringVar()
+                r_width = 850   # window width
+                r_height = 350  # window height
+                enteredValue = StringVar()  # cash entered
                 checkout_popup_win = Toplevel(bg='gray',
                                               borderwidth=0)
                 checkout_popup_win.title("Check Out: ")
@@ -593,8 +577,8 @@ class Bakery:
                                            command=lambda: finalizeCashOut())
                 checkout_finalize.grid(row=0,column=0,padx=10,pady=10)
 
-                checkout_clear_list = Button(checkout_frame3,             #Finalize clear item list
-                                             text="Finish Transaction",
+                checkout_clear_list = Button(checkout_frame3,           #Finalize clear item list
+                                             text="Clear Screen",
                                              font=('Times', 24),
                                              height=2,
                                              width=20,
@@ -603,31 +587,26 @@ class Bakery:
 
 
 # Show the charts window
-def showCharts(e):
+def showCharts(e,eid):
     e.destroy()
     newRoot=Tk()
-    application=Charts.Graph(newRoot)
+    application=Charts.Graph(newRoot, eid)
     newRoot.mainloop()
 
 #show the database window view
-def showDatabaseWindow(e):
+def showDatabaseWindow(e,eid):
     e.destroy()
     newRoot=Tk()
-    application=DatabaseWindow.DatabaseWindow(newRoot)
+    application=DatabaseWindow.DatabaseWindow(newRoot,eid)
     newRoot.mainloop()
 
 # Show the login window to get to the database view
 def showLoginWindow(e):
     e.destroy()
     newRoot=Tk()
-    application=LoginWindow.LoginDatabase(newRoot)
+    application=LoginWindow.Login(newRoot)
     newRoot.mainloop()
 
-# shows the login windown without destroying the lower level window
-def getLoginWindow():
-    newRoot = tkinter.Toplevel()
-    application = LoginWindow.LoginDatabase(newRoot)
-    newRoot.mainloop()
 
 # Do nothing
 def doNothing():

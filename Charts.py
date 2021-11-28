@@ -15,52 +15,56 @@ import Charts
 
 
 class Graph():
-    global root_width
-    root_width = 1900
-    global root_height
-    root_height = 1000
+    # global root_width
+    # root_width = 1900
+    # global root_height
+    # root_height = 1000
 
     #DUMMY FUNCTION- DOES NOTHING
     def doNothing():
         pass
 
     #SHOW THE MAIN WINDOW - BAKERY WINDOW
-    def showBakeryWindow(e):
+    def showBakeryWindow(e,eid):
         e.destroy()
         newRoot = Tk()
-        application = BakeryWindow.Bakery(newRoot)
+        application = BakeryWindow.Bakery(newRoot, eid)
         newRoot.mainloop()
 
-    def __init__(self,root):
+    def __init__(self,root, eid):
         self.root = root
         self.root.title("PRODUCT SALES PERFORMANCE")
+        self.eid = eid
         # GET THE DISPLAY WINDOW DIMENSIONS
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
+        # FIND THE CENTER OF THE MONITOR WINDOW
+        window_center_x = int(screen_width / 2 - screen_width / 2)
+        window_center_y = int(screen_height / 2 - screen_height / 2)
 
         # FIND THE CENTER OF THE MONITOR WINDOW
-        window_center_x = int(screen_width / 2 - root_width / 2)
-        window_center_y = int(screen_height / 2 - root_height / 2)
+        window_center_x = int(screen_width / 2 - screen_width / 2)
+        window_center_y = int(screen_height / 2 - screen_height / 2)
 
         # SET THE ROOT WINDOW LOCATION ON THE DISPLAY
-        root.geometry(f'{root_width}x{root_height}+{window_center_x}+{window_center_y}')
+        root.geometry(f'{screen_width}x{screen_height}+{window_center_x}+{window_center_y}')
 
         # CREATE A MENU BAR
         app_menu = Menu(root)
 
         # FILE MENU ITEMS
         file_menu = Menu(app_menu, tearoff=0)
-        file_menu.add_command(label="New", )
-        file_menu.add_command(label="Open", )
-        file_menu.add_command(label="Save", )
-        file_menu.add_separator()
+        # file_menu.add_command(label="New", )
+        # file_menu.add_command(label="Open", )
+        # file_menu.add_command(label="Save", )
+        # file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self.root.destroy)
         app_menu.add_cascade(label="File", menu=file_menu)
 
         # ADMINISTRATOR MENU OPTIONS
         admin_menu = Menu(app_menu, tearoff=0)
         admin_menu.add_command(label="Login", command=lambda: BakeryWindow.showLoginWindow(root))
-        admin_menu.add_command(label="Logout", command=lambda: BakeryWindow.Bakery(root))
+        admin_menu.add_command(label="Logout", command=lambda: BakeryWindow.Bakery(root, self.eid))
         admin_menu.add_separator()
         admin_menu.add_command(label="Charts", command=Graph.doNothing())
         app_menu.add_cascade(label="Admin", menu=admin_menu)
@@ -127,7 +131,7 @@ class Graph():
         exit_button = BakeryButton.BakeryButton(db_button_frame,
                                                 height=button_height,
                                                 width=button_width,
-                                                text="EXIT", command=lambda: Graph.showBakeryWindow(self.root))
+                                                text="EXIT", command=lambda: Graph.showBakeryWindow(self.root, self.eid))
         exit_button.pack()
 
         db_button_frame_width=db_button_frame.winfo_width()
@@ -137,8 +141,8 @@ class Graph():
         bar_graph_frame.grid(row=0,column=1,padx=10, pady=10,sticky=N)
 
         #CREATE A CANVAS TO DRAW THE GRAPH INTO
-        bar_graph_canvas_width=(root_width-db_button_frame_width-50)
-        bar_graph_canvas_height=(root_height/0.75)
+        bar_graph_canvas_width=(screen_width-db_button_frame_width-50)
+        bar_graph_canvas_height=(screen_height/0.75)
         bar_graph_canvas=Canvas(bar_graph_frame,
                                 width=bar_graph_canvas_width,
                                 height=bar_graph_canvas_height,

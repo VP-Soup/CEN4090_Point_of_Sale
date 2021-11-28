@@ -75,7 +75,7 @@ class Login:
     def login_user(self):
 
         if validateLoginCredentials(self.username.get(),self.password.get()) == 1:
-
+            self.eid = validateLoginCredentials(self.username.get(), self.password.get())
             #Do the work done by the main of DBMSproject.py
 
             #Destroy the current window
@@ -83,7 +83,7 @@ class Login:
 
             #Open new window
             newroot = Tk()
-            application = Bakery(newroot)
+            application = Bakery(newroot,self.eid)
             newroot.mainloop()
         else:
             '''Prompt user that either id or password is wrong'''
@@ -160,7 +160,8 @@ class LoginDatabase:
     def login_user(self):
 
         if validateLoginCredentials(self.username.get(), self.password.get()) == 1 and (self.username.get() == "admin"):
-
+            # Get employee eid
+            self.eid = validateLoginCredentials(self.username.get(), self.password.get())
             # Destroy the current window
             self.root.destroy()
 
