@@ -42,7 +42,7 @@ class DatabaseWindow:
     def __init__(self, root, eid):
         #SET THE WINDOW DIMENSIONS
         button_width=175
-        button_height=60
+        button_height=70
         self.root = root
         self.root.title('Database Entry')
         self.eid = eid
@@ -59,12 +59,6 @@ class DatabaseWindow:
 
         #SET THE ROOT WINDOW LOCATION ON THE DISPLAY
         root.geometry(f'{screen_width}x{screen_height}+{window_center_x}+{window_center_y}')
-        canvas = tk.Canvas(master=root, width=screen_width, height=screen_height, bg='white')
-        canvas.pack()
-        canvas['highlightcolor']='white'
-
-        # #CREATE A CONNECTION TO THE DATABASE
-        # conn=sqlite3.connect('BakeryDatabase.db')
 
         #SET THE STYLE OF THE DATABASE ENTRY
         db_style=ttk.Style()
@@ -73,7 +67,7 @@ class DatabaseWindow:
                            foreground='black',
                            rowheight=40,
                            fieldbackground="#eae1df",
-                           ipady=10,
+                           ipady=20,
                            font=('Times',20))
         db_style.configure('db.Treeview.Heading',
                            rowheight=40,
@@ -81,11 +75,13 @@ class DatabaseWindow:
 
         db_style.map('db.Treeview',
                      background=[('selected','#347083')])
-        db_frame=ttk.Frame(canvas,height = screen_height/2,width=screen_width)
+        db_frame=ttk.Frame(root,height = screen_height/2, width=screen_width)
         db_frame['padding']=5
         db_frame['borderwidth']=0
-        db_frame['relief']='sunken'
-        db_frame.pack(expand=True)
+        db_frame['relief']='flat'
+        db_frame.grid_rowconfigure(0,weight = 1)
+        db_frame.grid_columnconfigure(0, weight = 1)
+        db_frame.pack(expand = True)
 
         #ADD THE VERTICAL SCROLL BAR TO THE DATABASE ENTRY
         db_vert_scroll=Scrollbar(db_frame)
@@ -132,6 +128,7 @@ class DatabaseWindow:
                        anchor=W,
                        stretch=YES)
 
+
         #DATABASE VIEW COLUMN HEADINGS
         db_view.heading("#0",text="")
         db_view.heading("ID", text="ID", anchor=W)
@@ -164,7 +161,7 @@ class DatabaseWindow:
             count+=1
 
         #ADD AN ENTRY FORM INTO THE PRODUCT DATABASE
-        db_entry_frame=LabelFrame(canvas,text="Database Entry")
+        db_entry_frame=LabelFrame(root,text="Database Entry")
         db_entry_frame.pack(fill="x",expand=Y,padx=20,pady=20)
 
         #ADD PRODUCT ID LABEL TO THE GRID
@@ -297,7 +294,7 @@ class DatabaseWindow:
             set_button_commands()
 
         #CREATE A NEW FRAME TO ADD THE RECORD ENTRY AND DELETE BUTTONS
-        dbbutton_frame = LabelFrame(canvas, text="Database Records Controls")
+        dbbutton_frame = LabelFrame(root, text="Database Records Controls")
         for i in range (5): # For loop to enable equal column widths for the buttons
             dbbutton_frame.grid_columnconfigure(i,weight=1)
         dbbutton_frame.pack(fill="x", expand="yes", padx=20, pady=20)
@@ -398,12 +395,12 @@ class DatabaseWindow:
                     entries.append(e)                   #Add the entry text to a list for use in button
                     entry_index+=1
                     column_number+=1
-                    if column_number==6:
-                        column_number=0
-                        row_number+=1
+                    if column_number==6:                # Add label and entry box 3 pairs
+                        column_number=0                 # start over at column 0
+                        row_number+=1                   # Increment row
                 for child in db_entry_frame.winfo_children():
                     child.configure(font=('Times', 20))
-            db_view['columns'] = dbcolumns_names  # DEFINE THE COLUMN NAMES AND HEADERS
+            db_view['columns'] = dbcolumns_names  # Define the column names and headers
 
             for c in dbcolumns_names:          # LOOP THROUGH THE NAMES AND ADD THE HEADERS TO THE VIEW
                 db_view.column(c, anchor=W, stretch=YES)
@@ -426,10 +423,16 @@ class DatabaseWindow:
 
             entry_length=len(dbentry)           # LENGTH OF DATA TUPLES TO LOOP THROUGH
             for index in range(entry_length):   # LOOP THROUGH THE DATA AND ENTER IT INTO THE DATABASE VIEW
+                if (table == 'Employee'):
+                    value = list(dbentry[index])
+                    value[4] = '*****'
+                    value = tuple(value)
+                else:
+                    value = dbentry[index]
                 if count % 2 == 0:                # SET THIS ROW WITH A BACKGROUND COLOR DIFFERENT THAN THE NEXT
-                    db_view.insert("", 'end', iid=count, text='', values=dbentry[index], tags=('evenentry',))
+                    db_view.insert("", 'end', iid=count, text='', values=value, tags=('evenentry',))
                 elif count % 2 == 1:
-                    db_view.insert("",'end', iid=count, text='', values=dbentry[index], tags=('oddentry',))
+                    db_view.insert("",'end', iid=count, text='', values=value, tags=('oddentry',))
                 count += 1
                 index += 1
 

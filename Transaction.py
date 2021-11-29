@@ -126,6 +126,6 @@ class Transaction:
                                  paymentType=pt,
                                  transactionID=None)
         for l in self.lines:
-            insertTran_Item(tid, l.itemID, l.quantity, l.price)
+            insertTransactions_Item(tid, l.itemID, l.quantity, l.price)
         self.print_receipt()
 

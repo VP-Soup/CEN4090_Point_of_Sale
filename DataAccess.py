@@ -344,7 +344,7 @@ def getTran_ItemCostFromTranIdProdID(tranID, prodID):
 
 
 # Inserts a new Transaction_Item record into the Transaction_Item table
-def insertTran_Item(transactionID, productID, quantity=0, cost=0.00):
+def insertTransactions_Item(transactionID, productID, quantity=0, cost=0.00):
     try: 
         cur.execute('''INSERT INTO Transactions_Item (TransactionID, ProductID, Quantity, Cost) VALUES (?, ?, ?, ?)''',
                         (transactionID, productID, quantity, cost))
@@ -355,7 +355,7 @@ def insertTran_Item(transactionID, productID, quantity=0, cost=0.00):
 
 
 # Update Transaction_Item with IDs
-def updateTran_Item(tranID, prodID, quantity=-111, cost=-111):
+def updateTransactions_Item(tranID, prodID, quantity=-111, cost=-111):
     if quantity !=-111: 
         cur.execute('''UPDATE Transactions_Item SET Quantity = ? WHERE TransactionID = ? AND ProductID = ?''',
          (quantity, tranID, prodID, ))
@@ -367,7 +367,7 @@ def updateTran_Item(tranID, prodID, quantity=-111, cost=-111):
 
 
 # Remove transaction from table using ID 
-def deleteTran_Item(tranID, prodID):
+def deleteTransactions_Item(tranID, prodID):
     sql = "DELETE FROM Transactions_Item WHERE TransactionID = ? AND ProductID = ?"
     cur.execute(sql, (tranID, prodID,))
     conn.commit()

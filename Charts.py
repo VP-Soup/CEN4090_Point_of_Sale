@@ -11,7 +11,6 @@ from tkinter import *
 from tkinter import ttk
 
 import About,BakeryWindow,BakeryButton
-import Charts
 
 
 class Graph():
