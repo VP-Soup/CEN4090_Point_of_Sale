@@ -380,24 +380,26 @@ class DatabaseWindow:
                 row_number=0
                 for index in range(0, n):           # GET THE TABLE NAMES OUT FOR THE HEADERS
                     dbcolumns_names.append(cur[0].description[index][0])
-                    l[label_index] = Label(db_entry_frame,
-                                               text=cur[0].description[label_index][0],
-                                               justify="right").grid(row=row_number,
-                                                                     column=column_number,
-                                                                     padx=20, pady=20)
-                    label_index+=1
-                    column_number+=1
-                    e = Entry(db_entry_frame,width=30)  #Create new entry boxes for the number of
-                    e.grid(row=row_number,              #Colums in the new table
-                           column=column_number,
-                           padx=20,
-                           pady=20)
-                    entries.append(e)                   #Add the entry text to a list for use in button
-                    entry_index+=1
-                    column_number+=1
-                    if column_number==6:                # Add label and entry box 3 pairs
-                        column_number=0                 # start over at column 0
-                        row_number+=1                   # Increment row
+                    if query == 'viewEmployeeTable' and index == 0:
+                        pass
+                    else:
+                        l[label_index] = Label(db_entry_frame,text=cur[0].description[index][0],
+                                                justify="right").grid(row=row_number,
+                                                column=column_number,
+                                                padx=20, pady=20)
+                        label_index+=1
+                        column_number+=1
+                        e = Entry(db_entry_frame,width=30)  #Create new entry boxes for the number of
+                        e.grid(row=row_number,              #Colums in the new table
+                               column=column_number,
+                               padx=20,
+                               pady=20)
+                        entries.append(e)                   #Add the entry text to a list for use in button
+                        entry_index+=1
+                        column_number+=1
+                        if column_number==6:                # Add label and entry box 3 pairs
+                            column_number=0                 # start over at column 0
+                            row_number+=1                   # Increment row
                 for child in db_entry_frame.winfo_children():
                     child.configure(font=('Times', 20))
             db_view['columns'] = dbcolumns_names  # Define the column names and headers
