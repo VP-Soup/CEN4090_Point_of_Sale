@@ -1,0 +1,34 @@
+1,Chocolate Chip,48,1,0.25,Cookie
+2,Sugar,24,1,0.15,Cookie
+3,Ginger Snap,10,1,0.5,Cookie
+4,Biscotti,12,1,0.3,Cookie
+5,Shortbread,5,1,5,Cookie
+6,Macaron,24,1,0.5,Cookie
+7,Snickerdoodle,10,1,0.15,Cookie
+8,Oatmeal Raisin,12,1,0.13,Cookie
+9,Double Fudge,13,1,0.11,Cookie
+10,Gingerbread,14,1,0.09,Cookie
+11,Lavender Honey,9,1.25,0.08,Cookie
+12,Rye,5,2.99,0.5,Bread
+13,Honey,5,2.19,0.55,Bread
+14,White,5,2.29,0.45,Bread
+15,Sourdough,5,2.39,0.65,Bread
+16,Chicago,6,2.49,0.76,Bread
+17,Pretzel,7,2.09,0.35,Bread
+18,Wheat,8,2.79,0.42,Bread
+19,Chocolate Cake,2,12.29,1.29,Cake
+20,Strawberry Cake,2,12.39,1.19,Cake
+21,Vanilla Cake,3,12.19,1.39,Cake
+22,Chocolate Cupcake,12,1.99,0.09,Cupcake
+23,Strawberry Cupcake,13,1.89,0.09,Cupcake
+24,Vanilla Cupcake,12,1.79,0.09,Cupcake
+25,Double Choc Cupcake,14,1.99,0.11,Cupcake
+26,Chocolate Raspberry,15,2.09,0.25,Cupcake
+27,Champagne Cupcake,10,2.09,0.25,Cupcake
+28,Chocolate PB Cupcake,12,2.09,0.27,Cupcake
+29,Strawberry Lemon,11,2.09,0.28,Cupcake
+30,Birthday Cake Cupcake,12,2.19,0.27,Cupcake
+31,Very Berry Cupcake,11,2.29,0.32,Cupcake
+32,Mocha,15,1.89,0.12,Cupcake
+33,Pumpkin,12,1.99,0.15,Cupcake
+34,Caramel Apple Cupcake,9,1.69,0.18,Cupcake
