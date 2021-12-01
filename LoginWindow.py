@@ -74,7 +74,7 @@ class Login:
 
     def login_user(self):
 
-        if validateLoginCredentials(self.username.get(),self.password.get()) == 1:
+        if validateLoginCredentials(self.username.get(),self.password.get()) > 0:
             self.eid = validateLoginCredentials(self.username.get(), self.password.get())
             #Do the work done by the main of DBMSproject.py
 

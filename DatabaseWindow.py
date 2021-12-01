@@ -380,7 +380,7 @@ class DatabaseWindow:
                 row_number=0
                 for index in range(0, n):           # GET THE TABLE NAMES OUT FOR THE HEADERS
                     dbcolumns_names.append(cur[0].description[index][0])
-                    if query == 'viewEmployeeTable' and index == 0:
+                    if query == 'viewEmployeeTable' and (index == 0 or index == 5):
                         pass
                     else:
                         l[label_index] = Label(db_entry_frame,text=cur[0].description[index][0],
