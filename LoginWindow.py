@@ -64,6 +64,9 @@ class Login:
         self.button_frame.pack()
         self.LoginButton = Button(self.button_frame,borderwidth = 0,bg='white',command=self.login_user, image = self.login_btn).pack()
 
+        self.msg_frame = Frame(self.root)
+        self.msg_frame.pack(anchor=CENTER)
+
         #IF ENTER IS PRESSED SPECIFICALLY AFTER ENTERING THE PASSWORD ACK LIKE PRESSING THE LOGIN BUTTON
         def callback(event):
             self.login_user()
@@ -87,6 +90,10 @@ class Login:
             newroot.mainloop()
         else:
             '''Prompt user that either id or password is wrong'''
+            for widget in self.msg_frame.winfo_children():
+                widget.destroy()
+
+            self.msg_frame.pack_forget()
             self.msg_frame=Frame(self.root)
             self.msg_frame.pack(anchor=CENTER)
             self.message = Label(self.msg_frame,text = 'Username or Password incorrect. Try again!',fg = 'Red', bg = 'white')
@@ -167,7 +174,7 @@ class LoginDatabase:
 
             # Open new window
             newroot = Tk()
-            application = DatabaseWindow(newroot)
+            application = DatabaseWindow(newroot,self.eid)
             newroot.mainloop()
         elif validateLoginCredentials(self.username.get(), self.password.get()) != 1 and (self.username.get() == "admin"):
             '''Prompt user that either id or password is wrong'''
@@ -180,6 +187,10 @@ class LoginDatabase:
         else:
 
             '''Prompt user that either id or password is wrong'''
+            for widget in self.msg_frame.winfo_children():
+                widget.destroy()
+
+            self.msg_frame.pack_forget()
             self.msg_frame = Frame(self.root)
             self.msg_frame.pack(anchor=CENTER)
             self.message = Label(self.msg_frame, text='Your are not authorized to view this page!', fg='Red',

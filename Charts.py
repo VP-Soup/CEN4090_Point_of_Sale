@@ -10,7 +10,7 @@
 from tkinter import *
 from tkinter import ttk
 
-import About,BakeryWindow,BakeryButton
+import About,BakeryWindow,BakeryButton,DatabaseWindow
 
 
 class Graph():
@@ -23,14 +23,18 @@ class Graph():
     def doNothing():
         pass
 
+    # Close this window
+    def closeWindow(e):
+        e.destroy()
+
     #SHOW THE MAIN WINDOW - BAKERY WINDOW
     def showBakeryWindow(e,eid):
         e.destroy()
         newRoot = Tk()
-        application = BakeryWindow.Bakery(newRoot, eid)
+        application = BakeryWindow.Bakery(newRoot,eid)
         newRoot.mainloop()
 
-    def __init__(self,root, eid):
+    def __init__(self,root,eid):
         self.root = root
         self.root.title("PRODUCT SALES PERFORMANCE")
         self.eid = eid
@@ -63,8 +67,9 @@ class Graph():
         # ADMINISTRATOR MENU OPTIONS
         admin_menu = Menu(app_menu, tearoff=0)
         admin_menu.add_command(label="Login", command=lambda: BakeryWindow.showLoginWindow(root))
-        admin_menu.add_command(label="Logout", command=lambda: BakeryWindow.Bakery(root, self.eid))
+        admin_menu.add_command(label="Logout", command=lambda: closeWindow(root, self.eid))
         admin_menu.add_separator()
+        admin_menu.add_command(label="Database", command=lambda: BakeryWindow.showDatabaseWindow(self.root))
         admin_menu.add_command(label="Charts", command=Graph.doNothing())
         app_menu.add_cascade(label="Admin", menu=admin_menu)
 

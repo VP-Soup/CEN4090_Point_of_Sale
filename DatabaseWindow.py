@@ -305,10 +305,6 @@ class DatabaseWindow:
 
         # FILE MENU ITEMS
         file_menu = Menu(app_menu, tearoff=0)
-        # file_menu.add_command(label="New", )
-        # file_menu.add_command(label="Open", )
-        # file_menu.add_command(label="Save", )
-        # file_menu.add_separator()
         file_menu.add_command(label="Exit", command=root.destroy)
         app_menu.add_cascade(label="File", menu=file_menu)
 
@@ -349,8 +345,6 @@ class DatabaseWindow:
         root.config(menu=app_menu)
 
         #Button click event to refresh the screen
-
-
         # SETUP FUNCTION TO POPULATE THE DATABASE VIEW WITH DIFFERENT MENU SELECTIONS
         def setUp(query,table):
 
@@ -428,6 +422,7 @@ class DatabaseWindow:
                 if (table == 'Employee'):
                     value = list(dbentry[index])
                     value[4] = '*****'
+                    value[5] = '*****'
                     value = tuple(value)
                 else:
                     value = dbentry[index]

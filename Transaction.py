@@ -10,7 +10,7 @@ class LineItem:
         # call DAL to get values to populate these lines properly
         self.itemID = itemID
         self.quantity = quantity
-        self.price = getProductCostFromID(itemID)
+        self.price = getProductSellingPriceFromID(itemID)
         self.nameID = getProductNameFromID(itemID)
         self.tid = tid
 
@@ -21,7 +21,7 @@ class LineItem:
     def increment_quantity(self, itemID, amount):
         if self.itemID == itemID and amount <= self.quantity:
             self.quantity += amount
-            self.price = getProductCostFromID(itemID) * self.quantity
+            self.price = getProductSellingPriceFromID(itemID) * self.quantity
             return self.quantity
         else:
             return -1
